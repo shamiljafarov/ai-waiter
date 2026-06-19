@@ -1,0 +1,166 @@
+{
+  "brand": {
+    "name": "Green Cafe",
+    "tagline": "All for your cafe",
+    "description": "Sakit atmosfer, zərif təqdimat və seçilmiş menyu ilə fərqli dad təcrübəsi."
+  },
+  "footer": {
+    "hoursLabel": "İş saatları",
+    "hoursValue": "09:00 — 23:00",
+    "phoneLabel": "Telefon",
+    "addressLabel": "Ünvan",
+    "addressLine1": "Səbail ray., Şıxov qəs.",
+    "addressLine2": "Green City Resort & Residence",
+    "serviceNote": "*10% servis haqqı qiymətlərə daxil deyil"
+  },
+  "common": {
+    "noImage": "Şəkil yoxdur",
+    "descriptionFallback": "Tərkib məlumatı tezliklə əlavə olunacaq."
+  },
+  "categories": {
+    "soups": "Şorbalar",
+    "garnishes": "Qarnirlər",
+    "salads": "Salatlar",
+    "appetizers": "İsti və soyuq qəlyanaltılar",
+    "meat": "Ət yeməkləri",
+    "chicken": "Toyuq yeməkləri",
+    "saj": "Sac yeməkləri",
+    "fish": "Balıqlar",
+    "pasta": "Pastalar",
+    "pizza": "Pizzalar",
+    "burgers": "Burgerlər",
+    "fastfood": "Fast Food",
+    "desserts": "Desertlər",
+    "beerSnacks": "Pivə məzələri",
+    "sets": "Setlər"
+  },
+  "menu": {
+    "soups": {
+      "lentil": { "name": "Mərci şorbası", "description": "Ənənəvi mərci şorbası." },
+      "creamyMushroom": { "name": "Qaymaqlı göbələk şorbası", "description": "Qaymaqlı göbələk şorbası." },
+      "dushbere": { "name": "Düşbərə", "description": "Xəmir içində ətli düşbərə ilə hazırlanır." },
+      "tomato": { "name": "Tomat şorbası", "description": "Tomat əsaslı yüngül şorba." },
+      "chicken": { "name": "Toyuq şorbası", "description": "Toyuq əti ilə hazırlanmış klassik şorba." }
+    },
+    "garnishes": {
+      "rice": { "name": "Düyü", "description": "Sadə və yüngül qarnir." },
+      "grilledVegetables": { "name": "Tərəvəz qril", "description": "Qrildə hazırlanmış tərəvəzlər." },
+      "homePotatoes": { "name": "Evsayağı kartof", "description": "Evsayağı üsulla hazırlanmış kartof." },
+      "fries": { "name": "Kartof fri", "description": "Xırt-xırt qızardılmış kartof fri." }
+    },
+    "salads": {
+      "caesarChicken": { "name": "Sezar toyuq", "description": "Toyuq ətli klassik Sezar salatı." },
+      "caesarShrimp": { "name": "Sezar krevetka", "description": "Krevetkalı Sezar salatı." },
+      "crispyEggplant": { "name": "Xırt-xırt badımcan", "description": "Xırt-xırt badımcanla hazırlanan salat." },
+      "greek": { "name": "Yunan salatı", "description": "Təzə tərəvəz və pendirlə hazırlanmış Yunan salatı." },
+      "tomatoCranberry": { "name": "Pomidor zoğal sousunda", "description": "Zoğal sousu ilə təqdim olunan pomidor salatı." },
+      "tuna": { "name": "Ton balığı salatı", "description": "Ton balığı ilə yüngül salat." },
+      "shepherd": { "name": "Çoban salatı", "description": "Doğranmış təzə tərəvəzlərlə hazırlanır." },
+      "grill": { "name": "Manqal salatı", "description": "Manqalda bişmiş tərəvəzlərlə hazırlanır." },
+      "quinoaAthlete": { "name": "Izqara salatı", "description": "Kinoalı və qidalı salat." }
+    },
+    "appetizers": {
+      "cheesePlatter": { "name": "Pendir assorti", "description": "Müxtəlif pendir növlərinin assortisi." },
+      "pickles": { "name": "Turşu assorti", "description": "Qarışıq turşulardan ibarət assorti." },
+      "olives": { "name": "Zeytun assorti", "description": "Qara və yaşıl zeytun seçimi." },
+      "vegetableBouquet": { "name": "Tərəvəz buketi", "description": "Təzə tərəvəzlərdən ibarət buket." },
+      "herbCheese": { "name": "Göyərti pendir", "description": "Göyərti ilə servis olunan pendir." },
+      "onionRings": { "name": "Soğan halqası", "description": "Qızardılmış xırt-xırt soğan halqaları." },
+      "mozzarellaSticks": { "name": "Mozzarella sticks", "description": "Əridilmiş mozzarella ilə qızardılmış sticks." },
+      "tempuraShrimp": { "name": "Tempura krevetka", "description": "Tempura xəmirində krevetka." },
+      "crispyWings": { "name": "Çıtır qanad", "description": "Qızardılmış xırt-xırt toyuq qanadları." }
+    },
+    "meat": {
+      "pomegranateBeef": { "name": "Can əti nar qovurması", "description": "Nar sousu ilə hazırlanmış yumşaq ət yeməyi." },
+      "lokumSteak": { "name": "Lokum steyk", "description": "Yumşaq və şirəli steyk." },
+      "beefLanget": { "name": "Ət langet", "description": "Qarnir ilə təqdim olunan ət langet." },
+      "beefStroganoff": { "name": "Ət stroqanoff", "description": "Souslu klassik ət stroqanoff." }
+    },
+    "chicken": {
+      "schnitzel": { "name": "Toyuq şnitsel", "description": "Qızardılmış toyuq şnitsel." },
+      "tabaka": { "name": "Toyuq tabaka", "description": "Bütöv şəkildə bişirilmiş toyuq." },
+      "langet": { "name": "Toyuq langet", "description": "Qarnir ilə təqdim olunan toyuq langet." },
+      "stroganoff": { "name": "Toyuq stroqanoff", "description": "Souslu toyuq stroqanoff." }
+    },
+    "saj": {
+      "beefSaj": { "name": "Can əti sacı", "description": "Sacda bişirilmiş can əti və tərəvəzlər." },
+      "chickenSaj": { "name": "Toyuq sacı", "description": "Sacda hazırlanmış toyuq yeməyi." },
+      "lambSaj": { "name": "Quzu sacı", "description": "Sacda bişirilmiş quzu əti." },
+      "mixedSaj": { "name": "Qarışıq sac", "description": "Müxtəlif ət və tərəvəzlərin qarışıq sacı." }
+    },
+    "fish": {
+      "troutGrill": { "name": "Forel ızqara", "description": "Izqarada hazırlanmış forel." },
+      "salmonGrill": { "name": "Qızıl balıq ızqara", "description": "Izqarada bişmiş qızıl balıq." },
+      "seaBreamGrill": { "name": "Çupra ızqara", "description": "Izqarada hazırlanmış çupra." }
+    },
+    "pasta": {
+      "arrabbiata": { "name": "Penne Arrabbiata", "description": "Acılı tomat souslu penne." },
+      "bolognese": { "name": "Spagetti Bolonez", "description": "Bolonez souslu spagetti." },
+      "alfredo": { "name": "Fettuccine Alfredo", "description": "Qaymaqlı Alfredo sousu ilə fettuccine." },
+      "carbona": { "name": "Spagetti Carbonara", "description": "Klassik carbonara souslu spagetti." }
+    },
+    "pizza": {
+      "mixed": { "name": "Pizza qarışıq", "description": "Qarışıq əlavələrlə pizza." },
+      "bbq": { "name": "Pizza BBQ", "description": "BBQ souslu pizza." },
+      "fourCheese": { "name": "Pizza 4 pendir", "description": "Dörd pendir növü ilə hazırlanmış pizza." },
+      "margherita": { "name": "Pizza Marqarita", "description": "Mozzarella və tomat əsaslı klassik pizza." },
+      "pepperoni": { "name": "Pizza Pepperoni", "description": "Pepperoni ilə hazırlanmış pizza." },
+      "chicken": { "name": "Pizza toyuqlu", "description": "Toyuqlu pizza." },
+      "mexicano": { "name": "Pizza Mexicano", "description": "Acılı əlavələrlə Meksika üslubunda pizza." },
+      "caesar": { "name": "Pizza Sezar", "description": "Sezar üslubunda pizza." }
+    },
+    "burgers": {
+      "mexicano": { "name": "Mexicano burger", "description": "Acılı Meksika üslubunda burger." },
+      "cheese": { "name": "Cheese burger", "description": "Pendirli klassik burger." },
+      "chicken": { "name": "Chicken burger", "description": "Toyuqlu burger." },
+      "lokum": { "name": "Lokum burger", "description": "Yumşaq ətli premium burger." },
+      "bbq": { "name": "BBQ burger", "description": "BBQ souslu burger." }
+    },
+    "fastfood": {
+      "specialBeefWrap": { "name": "Özəl ət dürüm", "description": "Ət ilə hazırlanmış xüsusi dürüm." },
+      "specialChickenWrap": { "name": "Özəl toyuq dürüm", "description": "Toyuq ilə hazırlanmış xüsusi dürüm." },
+      "chickenShawarma": { "name": "Toyuq şaurma", "description": "Toyuq ətli şaurma." },
+      "beefShawarma": { "name": "Ət şaurma", "description": "Ət ilə hazırlanmış şaurma." },
+      "caesarRoll": { "name": "Sezar roll", "description": "Sezar üslubunda roll." },
+      "chickenBurrito": { "name": "Toyuq burritos", "description": "Toyuq içliyi ilə burrito." },
+      "beefBurrito": { "name": "Ət burritos", "description": "Ət içliyi ilə burrito." },
+      "clubSandwich": { "name": "Club sandwich", "description": "Qat-qat hazırlanmış klassik club sandwich." },
+      "cheeseToast": { "name": "Pendirli tost", "description": "Pendirli tost." },
+      "sucukToast": { "name": "Sucuklu tost", "description": "Sucuk ilə hazırlanmış tost." },
+      "chickenNuggets": { "name": "Toyuq nuggets fri ilə", "description": "Kartof fri ilə təqdim olunan toyuq nuggets." }
+    },
+    "desserts": {
+      "vanillaCheesecake": { "name": "Cheesecake vanil", "description": "Vanilli cheesecake." },
+      "strawberryCheesecake": { "name": "Cheesecake çiyələk", "description": "Çiyələkli cheesecake." },
+      "chocolateCheesecake": { "name": "Cheesecake şokolad", "description": "Şokoladlı cheesecake." },
+      "honeyCake": { "name": "Ballı tort", "description": "Ballı laylı tort." },
+      "tiramisu": { "name": "Tiramisu", "description": "Klassik İtalyan deserti." },
+      "sanSebastian": { "name": "San Sebastian", "description": "Yumşaq teksturalı San Sebastian cheesecake." },
+      "fruitPlate": { "name": "Meyvə tabağı", "description": "Mövsümi meyvə assortisi." }
+    },
+    "beerSnacks": {
+      "sausagePlate": { "name": "Sardelka sosis", "description": "Pivə üçün uyğun sosis çeşidi." },
+      "stringCheese": { "name": "Saçaq pendir", "description": "Klassik saçaq pendir." },
+      "smokedQuail": { "name": "Bildircin hisə verilmiş", "description": "Hisə verilmiş bildirçin." },
+      "friedCheese": { "name": "Qızardılmış pendir", "description": "Qızardılmış pendir dilimləri." },
+      "smokedMeat": { "name": "Hisəverilmiş boğaz", "description": "Hisə verilmiş ət qəlyanaltısı." },
+      "friedDushbere": { "name": "Düşbərə qızardılmış", "description": "Qızardılmış düşbərə." },
+      "smokedTrout": { "name": "Forel hisə verilmiş", "description": "Hisə verilmiş forel." },
+      "iveriaSausage": { "name": "İveria sosis", "description": "İveria sosis qəlyanaltısı." },
+      "chickpeas": { "name": "Noxud sadə", "description": "Sadə şəkildə servis olunan noxud." },
+      "lemon": { "name": "Limon", "description": "Təzə limon dilimləri." },
+      "pistachio": { "name": "Püstə", "description": "Qabıqla servis olunan püstə." },
+      "chips": { "name": "Çips", "description": "Xırt-xırt kartof çipsi." }
+    },
+    "sets": {
+      "beerSet": {
+        "name": "Pivə seti 1",
+        "description": "Saçaq pendir qızardılmış, göbələk çips, qrenki sadə, düşbərə qızardılmış, patenok qızardılmış, noxud sadə, toyuq boğazı hisə verilmiş."
+      },
+      "russianSet": {
+        "name": "Rus seti",
+        "description": "Siyənək balığı soyutma kartofla, balıq forel qızartma, İveria sosis, sardelka sosis, turşu xiyar kornişon, sala bekon, turşu kələm süfrəlik, çörək çovdar qara baton, balıq şprot konserv 160 qr."
+      }
+    }
+  }
+}

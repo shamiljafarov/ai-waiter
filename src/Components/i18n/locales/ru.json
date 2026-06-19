@@ -1,0 +1,166 @@
+{
+  "brand": {
+    "name": "Green Cafe",
+    "tagline": "All for your cafe",
+    "description": "Спокойная атмосфера, элегантная подача и тщательно подобранное меню для особого гастрономического опыта."
+  },
+  "footer": {
+    "hoursLabel": "Часы работы",
+    "hoursValue": "09:00 — 23:00",
+    "phoneLabel": "Телефон",
+    "addressLabel": "Адрес",
+    "addressLine1": "Сабаильский р-н, пос. Шихово",
+    "addressLine2": "Green City Resort & Residence",
+    "serviceNote": "*10% сервисный сбор не включён в цены"
+  },
+  "common": {
+    "noImage": "Нет изображения",
+    "descriptionFallback": "Описание скоро будет добавлено."
+  },
+  "categories": {
+    "soups": "Супы",
+    "garnishes": "Гарниры",
+    "salads": "Салаты",
+    "appetizers": "Горячие и холодные закуски",
+    "meat": "Мясные блюда",
+    "chicken": "Блюда из курицы",
+    "saj": "Садж",
+    "fish": "Рыба",
+    "pasta": "Паста",
+    "pizza": "Пицца",
+    "burgers": "Бургеры",
+    "fastfood": "Фастфуд",
+    "desserts": "Десерты",
+    "beerSnacks": "Закуски к пиву",
+    "sets": "Сеты"
+  },
+  "menu": {
+    "soups": {
+      "lentil": { "name": "Чечевичный суп", "description": "Традиционный чечевичный суп." },
+      "creamyMushroom": { "name": "Крем-суп из грибов", "description": "Нежный крем-суп из грибов." },
+      "dushbere": { "name": "Дюшбара", "description": "Маленькие мясные пельмени в бульоне." },
+      "tomato": { "name": "Томатный суп", "description": "Лёгкий суп на основе томатов." },
+      "chicken": { "name": "Куриный суп", "description": "Классический суп с курицей." }
+    },
+    "garnishes": {
+      "rice": { "name": "Рис", "description": "Лёгкий и простой гарнир." },
+      "grilledVegetables": { "name": "Овощи на гриле", "description": "Овощи, приготовленные на гриле." },
+      "homePotatoes": { "name": "Домашний картофель", "description": "Картофель, приготовленный по-домашнему." },
+      "fries": { "name": "Картофель фри", "description": "Хрустящий картофель фри." }
+    },
+    "salads": {
+      "caesarChicken": { "name": "Цезарь с курицей", "description": "Классический салат Цезарь с курицей." },
+      "caesarShrimp": { "name": "Цезарь с креветками", "description": "Салат Цезарь с креветками." },
+      "crispyEggplant": { "name": "Хрустящий баклажан", "description": "Салат с хрустящим баклажаном." },
+      "greek": { "name": "Греческий салат", "description": "Греческий салат со свежими овощами и сыром." },
+      "tomatoCranberry": { "name": "Помидоры в клюквенном соусе", "description": "Помидоры, подаваемые с клюквенным соусом." },
+      "tuna": { "name": "Салат с тунцом", "description": "Лёгкий салат с тунцом." },
+      "shepherd": { "name": "Пастуший салат", "description": "Салат из свеженарезанных овощей." },
+      "grill": { "name": "Салат-гриль", "description": "Салат с овощами на гриле." },
+      "quinoaAthlete": { "name": "Салат на гриле", "description": "Питательный салат с киноа." }
+    },
+    "appetizers": {
+      "cheesePlatter": { "name": "Сырное ассорти", "description": "Ассорти из различных видов сыра." },
+      "pickles": { "name": "Ассорти солений", "description": "Смешанное ассорти из солений." },
+      "olives": { "name": "Ассорти оливок", "description": "Подборка чёрных и зелёных оливок." },
+      "vegetableBouquet": { "name": "Овощной букет", "description": "Ассорти из свежих овощей." },
+      "herbCheese": { "name": "Сыр с зеленью", "description": "Сыр, подаваемый с зеленью." },
+      "onionRings": { "name": "Луковые кольца", "description": "Хрустящие жареные луковые кольца." },
+      "mozzarellaSticks": { "name": "Моцарелла стики", "description": "Жареные стики с расплавленной моцареллой." },
+      "tempuraShrimp": { "name": "Креветки темпура", "description": "Креветки в темпурном кляре." },
+      "crispyWings": { "name": "Хрустящие крылышки", "description": "Жареные хрустящие куриные крылышки." }
+    },
+    "meat": {
+      "pomegranateBeef": { "name": "Говядина в гранатовом соусе", "description": "Нежная говядина в гранатовом соусе." },
+      "lokumSteak": { "name": "Локум стейк", "description": "Нежный и сочный стейк." },
+      "beefLanget": { "name": "Говяжий лангет", "description": "Говяжий лангет с гарниром." },
+      "beefStroganoff": { "name": "Бифстроганов", "description": "Классический бифстроганов в соусе." }
+    },
+    "chicken": {
+      "schnitzel": { "name": "Куриный шницель", "description": "Жареный куриный шницель." },
+      "tabaka": { "name": "Цыплёнок табака", "description": "Запечённая целиком курица." },
+      "langet": { "name": "Куриный лангет", "description": "Куриный лангет с гарниром." },
+      "stroganoff": { "name": "Куриный строганов", "description": "Куриный строганов в соусе." }
+    },
+    "saj": {
+      "beefSaj": { "name": "Садж с говядиной", "description": "Говядина с овощами, приготовленная на садже." },
+      "chickenSaj": { "name": "Садж с курицей", "description": "Блюдо из курицы, приготовленное на садже." },
+      "lambSaj": { "name": "Садж с бараниной", "description": "Баранина, приготовленная на садже." },
+      "mixedSaj": { "name": "Смешанный садж", "description": "Смешанный садж с мясом и овощами." }
+    },
+    "fish": {
+      "troutGrill": { "name": "Форель на гриле", "description": "Форель, приготовленная на гриле." },
+      "salmonGrill": { "name": "Лосось на гриле", "description": "Лосось, приготовленный на гриле." },
+      "seaBreamGrill": { "name": "Дорадо на гриле", "description": "Дорадо, приготовленная на гриле." }
+    },
+    "pasta": {
+      "arrabbiata": { "name": "Пенне Арраббиата", "description": "Пенне с острым томатным соусом." },
+      "bolognese": { "name": "Спагетти Болоньезе", "description": "Спагетти с соусом Болоньезе." },
+      "alfredo": { "name": "Феттуччине Альфредо", "description": "Феттуччине в сливочном соусе Альфредо." },
+      "carbona": { "name": "Спагетти Карбонара", "description": "Классическая карбонара." }
+    },
+    "pizza": {
+      "mixed": { "name": "Пицца ассорти", "description": "Пицца с разнообразными начинками." },
+      "bbq": { "name": "Пицца BBQ", "description": "Пицца с соусом BBQ." },
+      "fourCheese": { "name": "Пицца 4 сыра", "description": "Пицца с четырьмя видами сыра." },
+      "margherita": { "name": "Пицца Маргарита", "description": "Классическая пицца с моцареллой и томатами." },
+      "pepperoni": { "name": "Пицца Пепперони", "description": "Пицца с пепперони." },
+      "chicken": { "name": "Пицца с курицей", "description": "Пицца с курицей." },
+      "mexicano": { "name": "Пицца Мексикано", "description": "Острая пицца в мексиканском стиле." },
+      "caesar": { "name": "Пицца Цезарь", "description": "Пицца в стиле Цезарь." }
+    },
+    "burgers": {
+      "mexicano": { "name": "Мексикано бургер", "description": "Острый бургер в мексиканском стиле." },
+      "cheese": { "name": "Чизбургер", "description": "Классический бургер с сыром." },
+      "chicken": { "name": "Чикен бургер", "description": "Бургер с курицей." },
+      "lokum": { "name": "Локум бургер", "description": "Премиальный бургер с нежной говядиной." },
+      "bbq": { "name": "BBQ бургер", "description": "Бургер с соусом BBQ." }
+    },
+    "fastfood": {
+      "specialBeefWrap": { "name": "Фирменный ролл с говядиной", "description": "Фирменный ролл с говядиной." },
+      "specialChickenWrap": { "name": "Фирменный ролл с курицей", "description": "Фирменный ролл с курицей." },
+      "chickenShawarma": { "name": "Куриная шаурма", "description": "Шаурма с курицей." },
+      "beefShawarma": { "name": "Шаурма с говядиной", "description": "Шаурма с говядиной." },
+      "caesarRoll": { "name": "Ролл Цезарь", "description": "Ролл в стиле Цезарь." },
+      "chickenBurrito": { "name": "Куриный буррито", "description": "Буррито с куриной начинкой." },
+      "beefBurrito": { "name": "Буррито с говядиной", "description": "Буррито с говяжьей начинкой." },
+      "clubSandwich": { "name": "Клаб сэндвич", "description": "Классический многослойный клаб-сэндвич." },
+      "cheeseToast": { "name": "Тост с сыром", "description": "Поджаренный сэндвич с сыром." },
+      "sucukToast": { "name": "Тост с суджуком", "description": "Поджаренный сэндвич с суджуком." },
+      "chickenNuggets": { "name": "Куриные наггетсы с картофелем фри", "description": "Куриные наггетсы, подаваемые с картофелем фри." }
+    },
+    "desserts": {
+      "vanillaCheesecake": { "name": "Ванильный чизкейк", "description": "Чизкейк с ванилью." },
+      "strawberryCheesecake": { "name": "Клубничный чизкейк", "description": "Чизкейк с клубникой." },
+      "chocolateCheesecake": { "name": "Шоколадный чизкейк", "description": "Чизкейк с шоколадом." },
+      "honeyCake": { "name": "Медовик", "description": "Слоёный медовый торт." },
+      "tiramisu": { "name": "Тирамису", "description": "Классический итальянский десерт." },
+      "sanSebastian": { "name": "Сан-Себастьян", "description": "Чизкейк Сан-Себастьян с нежной текстурой." },
+      "fruitPlate": { "name": "Фруктовая тарелка", "description": "Ассорти из сезонных фруктов." }
+    },
+    "beerSnacks": {
+      "sausagePlate": { "name": "Сарделька сосиска", "description": "Колбасная закуска, подходящая к пиву." },
+      "stringCheese": { "name": "Сыр чечил", "description": "Классический чечил." },
+      "smokedQuail": { "name": "Копчёный перепел", "description": "Закуска из копчёного перепела." },
+      "friedCheese": { "name": "Жареный сыр", "description": "Ломтики жареного сыра." },
+      "smokedMeat": { "name": "Копчёное мясо", "description": "Копчёная мясная закуска." },
+      "friedDushbere": { "name": "Жареная дюшбара", "description": "Жареная дюшбара." },
+      "smokedTrout": { "name": "Копчёная форель", "description": "Закуска из копчёной форели." },
+      "iveriaSausage": { "name": "Иверия сосиска", "description": "Закуска из сосисок Иверия." },
+      "chickpeas": { "name": "Нут простой", "description": "Нут в простой подаче." },
+      "lemon": { "name": "Лимон", "description": "Свежие ломтики лимона." },
+      "pistachio": { "name": "Фисташки", "description": "Фисташки в скорлупе." },
+      "chips": { "name": "Чипсы", "description": "Хрустящие картофельные чипсы." }
+    },
+    "sets": {
+      "beerSet": {
+        "name": "Пивной сет 1",
+        "description": "Жареный сыр чечил, грибные чипсы, простые гренки, жареная дюшбара, жареный патенок, простой нут, копчёная куриная шея."
+      },
+      "russianSet": {
+        "name": "Русский сет",
+        "description": "Охлаждённая сельдь с картофелем, жареная форель, сосиски Иверия, сарделька, маринованные корнишоны, бекон, квашеная капуста, ржаной чёрный батон, шпроты консервированные 160 г."
+      }
+    }
+  }
+}

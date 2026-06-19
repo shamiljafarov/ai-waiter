@@ -1,0 +1,166 @@
+{
+  "brand": {
+    "name": "Green Cafe",
+    "tagline": "All for your cafe",
+    "description": "A calm atmosphere, elegant presentation, and a carefully selected menu for a refined dining experience."
+  },
+  "footer": {
+    "hoursLabel": "Working hours",
+    "hoursValue": "09:00 — 23:00",
+    "phoneLabel": "Phone",
+    "addressLabel": "Address",
+    "addressLine1": "Sabail district, Shikhov settlement",
+    "addressLine2": "Green City Resort & Residence",
+    "serviceNote": "*10% service charge is not included in the prices"
+  },
+  "common": {
+    "noImage": "No Image",
+    "descriptionFallback": "Description will be added soon."
+  },
+  "categories": {
+    "soups": "Soups",
+    "garnishes": "Garnishes",
+    "salads": "Salads",
+    "appetizers": "Hot & Cold Appetizers",
+    "meat": "Meat Dishes",
+    "chicken": "Chicken Dishes",
+    "saj": "Saj Dishes",
+    "fish": "Fish",
+    "pasta": "Pasta",
+    "pizza": "Pizza",
+    "burgers": "Burgers",
+    "fastfood": "Fast Food",
+    "desserts": "Desserts",
+    "beerSnacks": "Beer Snacks",
+    "sets": "Sets"
+  },
+  "menu": {
+    "soups": {
+      "lentil": { "name": "Lentil Soup", "description": "Traditional lentil soup." },
+      "creamyMushroom": { "name": "Creamy Mushroom Soup", "description": "Creamy mushroom soup." },
+      "dushbere": { "name": "Dushbere", "description": "Small meat dumplings served in broth." },
+      "tomato": { "name": "Tomato Soup", "description": "Light tomato-based soup." },
+      "chicken": { "name": "Chicken Soup", "description": "Classic soup prepared with chicken." }
+    },
+    "garnishes": {
+      "rice": { "name": "Rice", "description": "A light and simple side dish." },
+      "grilledVegetables": { "name": "Grilled Vegetables", "description": "Vegetables cooked on the grill." },
+      "homePotatoes": { "name": "Home-style Potatoes", "description": "Potatoes prepared in a home-style way." },
+      "fries": { "name": "French Fries", "description": "Crispy fried French fries." }
+    },
+    "salads": {
+      "caesarChicken": { "name": "Chicken Caesar", "description": "Classic Caesar salad with chicken." },
+      "caesarShrimp": { "name": "Shrimp Caesar", "description": "Caesar salad with shrimp." },
+      "crispyEggplant": { "name": "Crispy Eggplant", "description": "Salad prepared with crispy eggplant." },
+      "greek": { "name": "Greek Salad", "description": "Greek salad with fresh vegetables and cheese." },
+      "tomatoCranberry": { "name": "Tomatoes in Cranberry Sauce", "description": "Tomato salad served with cranberry sauce." },
+      "tuna": { "name": "Tuna Salad", "description": "Light salad with tuna." },
+      "shepherd": { "name": "Shepherd Salad", "description": "Prepared with freshly chopped vegetables." },
+      "grill": { "name": "Grill Salad", "description": "Prepared with grilled vegetables." },
+      "quinoaAthlete": { "name": "Grilled salad", "description": "Nutritious salad with quinoa." }
+    },
+    "appetizers": {
+      "cheesePlatter": { "name": "Cheese Platter", "description": "Assorted selection of cheeses." },
+      "pickles": { "name": "Pickles Assortment", "description": "Mixed assortment of pickles." },
+      "olives": { "name": "Olives Assortment", "description": "Selection of black and green olives." },
+      "vegetableBouquet": { "name": "Vegetable Bouquet", "description": "Fresh vegetable assortment." },
+      "herbCheese": { "name": "Herb Cheese", "description": "Cheese served with herbs." },
+      "onionRings": { "name": "Onion Rings", "description": "Crispy fried onion rings." },
+      "mozzarellaSticks": { "name": "Mozzarella Sticks", "description": "Fried sticks with melted mozzarella." },
+      "tempuraShrimp": { "name": "Tempura Shrimp", "description": "Shrimp in tempura batter." },
+      "crispyWings": { "name": "Crispy Wings", "description": "Crispy fried chicken wings." }
+    },
+    "meat": {
+      "pomegranateBeef": { "name": "Beef in Pomegranate Sauce", "description": "Tender beef prepared with pomegranate sauce." },
+      "lokumSteak": { "name": "Lokum Steak", "description": "Tender and juicy steak." },
+      "beefLanget": { "name": "Beef Langet", "description": "Beef langet served with garnish." },
+      "beefStroganoff": { "name": "Beef Stroganoff", "description": "Classic beef stroganoff in sauce." }
+    },
+    "chicken": {
+      "schnitzel": { "name": "Chicken Schnitzel", "description": "Fried chicken schnitzel." },
+      "tabaka": { "name": "Chicken Tabaka", "description": "Whole roasted chicken." },
+      "langet": { "name": "Chicken Langet", "description": "Chicken langet served with garnish." },
+      "stroganoff": { "name": "Chicken Stroganoff", "description": "Chicken stroganoff in sauce." }
+    },
+    "saj": {
+      "beefSaj": { "name": "Beef Saj", "description": "Beef and vegetables cooked on saj." },
+      "chickenSaj": { "name": "Chicken Saj", "description": "Chicken dish prepared on saj." },
+      "lambSaj": { "name": "Lamb Saj", "description": "Lamb cooked on saj." },
+      "mixedSaj": { "name": "Mixed Saj", "description": "Mixed saj with meat and vegetables." }
+    },
+    "fish": {
+      "troutGrill": { "name": "Grilled Trout", "description": "Trout cooked on the grill." },
+      "salmonGrill": { "name": "Grilled Salmon", "description": "Salmon grilled to perfection." },
+      "seaBreamGrill": { "name": "Grilled Sea Bream", "description": "Sea bream prepared on the grill." }
+    },
+    "pasta": {
+      "arrabbiata": { "name": "Penne Arrabbiata", "description": "Penne with spicy tomato sauce." },
+      "bolognese": { "name": "Spaghetti Bolognese", "description": "Spaghetti with Bolognese sauce." },
+      "alfredo": { "name": "Fettuccine Alfredo", "description": "Fettuccine with creamy Alfredo sauce." },
+      "carbona": { "name": "Spaghetti Carbonara", "description": "Classic spaghetti carbonara." }
+    },
+    "pizza": {
+      "mixed": { "name": "Mixed Pizza", "description": "Pizza with mixed toppings." },
+      "bbq": { "name": "BBQ Pizza", "description": "Pizza with BBQ sauce." },
+      "fourCheese": { "name": "Four Cheese Pizza", "description": "Pizza prepared with four types of cheese." },
+      "margherita": { "name": "Margherita Pizza", "description": "Classic pizza with mozzarella and tomato." },
+      "pepperoni": { "name": "Pepperoni Pizza", "description": "Pizza prepared with pepperoni." },
+      "chicken": { "name": "Chicken Pizza", "description": "Pizza with chicken." },
+      "mexicano": { "name": "Mexicano Pizza", "description": "Spicy Mexican-style pizza." },
+      "caesar": { "name": "Caesar Pizza", "description": "Pizza in Caesar style." }
+    },
+    "burgers": {
+      "mexicano": { "name": "Mexicano Burger", "description": "Spicy Mexican-style burger." },
+      "cheese": { "name": "Cheese Burger", "description": "Classic burger with cheese." },
+      "chicken": { "name": "Chicken Burger", "description": "Burger with chicken." },
+      "lokum": { "name": "Lokum Burger", "description": "Premium burger with tender beef." },
+      "bbq": { "name": "BBQ Burger", "description": "Burger with BBQ sauce." }
+    },
+    "fastfood": {
+      "specialBeefWrap": { "name": "Special Beef Wrap", "description": "Special wrap prepared with beef." },
+      "specialChickenWrap": { "name": "Special Chicken Wrap", "description": "Special wrap prepared with chicken." },
+      "chickenShawarma": { "name": "Chicken Shawarma", "description": "Shawarma with chicken." },
+      "beefShawarma": { "name": "Beef Shawarma", "description": "Shawarma with beef." },
+      "caesarRoll": { "name": "Caesar Roll", "description": "Roll prepared in Caesar style." },
+      "chickenBurrito": { "name": "Chicken Burrito", "description": "Burrito with chicken filling." },
+      "beefBurrito": { "name": "Beef Burrito", "description": "Burrito with beef filling." },
+      "clubSandwich": { "name": "Club Sandwich", "description": "Classic layered club sandwich." },
+      "cheeseToast": { "name": "Cheese Toast", "description": "Toasted sandwich with cheese." },
+      "sucukToast": { "name": "Sucuk Toast", "description": "Toasted sandwich with sucuk." },
+      "chickenNuggets": { "name": "Chicken Nuggets with Fries", "description": "Chicken nuggets served with fries." }
+    },
+    "desserts": {
+      "vanillaCheesecake": { "name": "Vanilla Cheesecake", "description": "Cheesecake with vanilla." },
+      "strawberryCheesecake": { "name": "Strawberry Cheesecake", "description": "Cheesecake with strawberry." },
+      "chocolateCheesecake": { "name": "Chocolate Cheesecake", "description": "Cheesecake with chocolate." },
+      "honeyCake": { "name": "Honey Cake", "description": "Layered honey cake." },
+      "tiramisu": { "name": "Tiramisu", "description": "Classic Italian dessert." },
+      "sanSebastian": { "name": "San Sebastian", "description": "Soft-textured San Sebastian cheesecake." },
+      "fruitPlate": { "name": "Fruit Plate", "description": "Assorted seasonal fruits." }
+    },
+    "beerSnacks": {
+      "sausagePlate": { "name": "Sausage Platter", "description": "Sausage selection suitable for beer." },
+      "stringCheese": { "name": "String Cheese", "description": "Classic string cheese." },
+      "smokedQuail": { "name": "Smoked Quail", "description": "Smoked quail appetizer." },
+      "friedCheese": { "name": "Fried Cheese", "description": "Slices of fried cheese." },
+      "smokedMeat": { "name": "Smoked Meat", "description": "Smoked meat appetizer." },
+      "friedDushbere": { "name": "Fried Dushbere", "description": "Fried dushbere." },
+      "smokedTrout": { "name": "Smoked Trout", "description": "Smoked trout appetizer." },
+      "iveriaSausage": { "name": "Iveria Sausage", "description": "Iveria sausage snack." },
+      "chickpeas": { "name": "Plain Chickpeas", "description": "Simply served chickpeas." },
+      "lemon": { "name": "Lemon", "description": "Fresh lemon slices." },
+      "pistachio": { "name": "Pistachio", "description": "Pistachios served in shell." },
+      "chips": { "name": "Chips", "description": "Crispy potato chips." }
+    },
+    "sets": {
+      "beerSet": {
+        "name": "Beer Set 1",
+        "description": "Fried string cheese, mushroom chips, plain croutons, fried dushbere, fried patenok, plain chickpeas, smoked chicken neck."
+      },
+      "russianSet": {
+        "name": "Russian Set",
+        "description": "Cold herring with potatoes, fried trout, Iveria sausage, sardelka sausage, pickled gherkins, bacon fat, pickled cabbage, dark rye bread, canned sprats 160 g."
+      }
+    }
+  }
+}
