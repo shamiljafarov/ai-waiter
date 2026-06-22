@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from "react";
 import { GoogleGenAI, Modality, type Session, type LiveServerMessage } from "@google/genai";
 
-const LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
+const LIVE_MODEL = "gemini-3.1-flash-live-preview";
 const INPUT_SAMPLE_RATE = 16000;
 const OUTPUT_SAMPLE_RATE = 24000;
 

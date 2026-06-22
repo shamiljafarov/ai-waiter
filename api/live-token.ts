@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI, Modality } from "@google/genai";
 
 // Live API üçün istifadə olunan model — token bu modelə "kilidlənir"
-const LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-09-2025";
+const LIVE_MODEL = "gemini-3.1-flash-live-preview";
 
 // Ephemeral token-lər brauzerin Gemini Live API-yə birbaşa, təhlükəsiz qoşulması üçündür.
 // Əsl GEMINI_API_KEY yalnız serverdə qalır; brauzerə yalnız 30 dəqiqəlik token gedir.
