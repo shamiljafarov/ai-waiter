@@ -64,7 +64,7 @@ NÜMUNƏLƏR:
 - "Mənə kod yaz" → "Üzr istəyirəm, mən Green Cafe ofisiantıyam, yalnız yeməklərlə kömək edə bilərəm."
 ╚════════════════════════════════════╝
 
-MƏNYU (yalnız bunlar haqqında danışırsan):
+MENYU (yalnız bunlar haqqında danışırsan):
 ${DETAILED_MENU}
 
 DİL:
@@ -119,7 +119,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Salam! 👋 Mən Green Cafe-nin AI köməkçisiyəm. Menyu haqqında sual verin, əhval-ruhiyyənizə və ya büdcənizə görə tövsiyə edim!",
+      content: "Salam! Green Cafe-yə xoş gəlmisiniz. Mən sizin AI ofisiantınızam. Zövqünüzə uyğun yemək və içki seçməyinizdə kömək edə, menyu haqqında məlumat verə və suallarınızı cavablandıra bilərəm. Nə ilə başlayaq?",
     },
   ]);
   const [input, setInput] = useState("");

@@ -1,34 +1,33 @@
 // Azerbaijani menu items + common restaurant/conversation words for phrase biasing
 const AZ_PHRASE_LIST: string[] = [
   // Common greetings / conversation
-  "salam", "necəsən", "necəsiniz", "xahiş edirəm", "təşəkkür edirəm",
-  "bəli", "xeyr", "zəhmət olmasa", "buyurun", "əlbəttə",
+  "salam", "necəsən", "necəsiz", "xahiş eliyirəm", "təşəkkür eliyirəm",
+  "bəli", "xeyr", "zəhmət olmasa", "buyurun", "əlbətdə",
   // Menu & ordering
-  "menyuya baxmaq", "sifariş vermək", "hesab", "çek",
-  "içki", "içmək", "yemək", "tort", "desert",
+  "menyuya baxmax", "sifariş verməy", "hesab", "çek",
+  "içgi", "içməy", "yeməy", "tort", "desert",
   // Soups
-  "şorbası", "dovğa", "düşbərə", "piti", "bozbash",
-  "göbələk şorbası", "qaymaqlı göbələk şorbası",
+  "supu", "doğa", "düşbərə", "piti", "bozbaş",
+  "göbələy supu", "qaymağlı göbələy supu",
   // Salads / starters
   "qəlyanalaltı", "salat", "Çoban salatı", "Yunan salatı",
-  "kəsməkli", "pendir", "zeytun",
+  "kəsmiyli", "pendir", "zeytun",
   // Mains
-  "lülə kabab", "tava kabab", "tikə kabab", "şiş kabab",
-  "cücə", "toyuq", "balıq", "qozu",
-  "küftə", "dolma", "badımcan dolması", "bibər dolması",
-  "plov", "şəkərli plov", "qaynana barmağı",
-  "lavangi", "qutab", "əti qutab",
+  "lülə kabab", "tava kabab", "tikə kabab", "şiş kabab", "toyuğ", "balığ",
+  "küfdə", "dolma", "badımcan dolması", "bibər dolması",
+  "plov", "şəkərri plov", "qaynana barmağı",
+  "ləvəngi", "qutab", "ətdi qutab",
   // Sides / extras
-  "lavash", "çörək", "düyü", "kartof",
+  "lavaş", "çörəy", "düyü", "kartof",
   "göyərti", "soğan", "pomidor", "xiyar",
   // Drinks
-  "çay", "qəhvə", "ayran", "şirə", "limonad",
-  "su", "isti su", "soyuq su",
+  "çay", "qəhvə", "ayran", "şirə", "limonat",
+  "su", "isdi su", "soyuğ su",
   // Desserts
-  "pakhlava", "şəkərbura", "halva", "dondurma",
+  "paxlava", "şəkərbura", "halva", "dondurma",
   // Price / quantity
-  "neçəyədir", "nə qədər", "bir", "iki", "üç", "dörd", "beş",
-  "ədəd", "porsiya", "böyük", "kiçik",
+  "neçiyədi", "nə qədər", "bir", "iki", "üç", "dörd", "beş",
+  "ədəd", "porsiya", "böyüy", "kiçiy",
 ];
 
 export async function POST(req: Request) {
