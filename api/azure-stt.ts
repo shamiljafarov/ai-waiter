@@ -1,81 +1,158 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+// Azerbaijani menu items + common restaurant/conversation words for phrase biasing
+const AZ_PHRASE_LIST: string[] = [
+  // Common greetings / conversation
+  "salam", "necəsən", "necəsiniz", "xahiş edirəm", "təşəkkür edirəm",
+  "bəli", "xeyr", "zəhmət olmasa", "buyurun", "əlbəttə",
+  // Menu & ordering
+  "menyuya baxmaq", "sifariş vermək", "hesab", "çek",
+  "içki", "içmək", "yemək", "tort", "desert",
+  // Soups
+  "şorbası", "dovğa", "düşbərə", "piti", "bozbash",
+  "göbələk şorbası", "qaymaqlı göbələk şorbası",
+  // Salads / starters
+  "qəlyanalaltı", "salat", "Çoban salatı", "Yunan salatı",
+  "kəsməkli", "pendir", "zeytun",
+  // Mains
+  "lülə kabab", "tava kabab", "tikə kabab", "şiş kabab",
+  "cücə", "toyuq", "balıq", "qozu",
+  "küftə", "dolma", "badımcan dolması", "bibər dolması",
+  "plov", "şəkərli plov", "qaynana barmağı",
+  "lavangi", "qutab", "əti qutab",
+  // Sides / extras
+  "lavash", "çörək", "düyü", "kartof",
+  "göyərti", "soğan", "pomidor", "xiyar",
+  // Drinks
+  "çay", "qəhvə", "ayran", "şirə", "limonad",
+  "su", "isti su", "soyuq su",
+  // Desserts
+  "pakhlava", "şəkərbura", "halva", "dondurma",
+  // Price / quantity
+  "neçəyədir", "nə qədər", "bir", "iki", "üç", "dörd", "beş",
+  "ədəd", "porsiya", "böyük", "kiçik",
+];
 
-// Azure Speech "fast transcription" — audio faylını mətnə çevirir.
-// Dil təyini yalnız AZ / RU / EN ilə məhdudlaşır, ona görə ərəbcə kimi səhv dil çıxmır.
-// Key yalnız serverdə qalır (AZURE_SPEECH_KEY), brauzerə getmir.
-export const config = {
-  api: { bodyParser: false },
-};
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
-  }
-
-  const key = process.env.AZURE_SPEECH_KEY;
-  const region = process.env.AZURE_SPEECH_REGION;
-  if (!key || !region) {
-    res.status(500).json({ error: "Server is missing AZURE_SPEECH_KEY or AZURE_SPEECH_REGION" });
-    return;
-  }
-
+export async function POST(req: Request) {
   try {
-    // Gələn audio-nu (binary) tam oxu
-    const chunks: Buffer[] = [];
-    for await (const chunk of req) {
-      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
-    }
-    const audioBuffer = Buffer.concat(chunks);
+    const formData = await req.formData();
+    const audioFile = formData.get("audio") as File;
 
-    // Azure fast transcription multipart/form-data tələb edir
-    const boundary = "----AzureFormBoundary" + Math.random().toString(36).slice(2);
-    const definition = JSON.stringify({
-      // Yalnız Azərbaycan dili — səsli mesaj həmişə AZ kimi tanınır,
-      // ruscaya/ərəbcəyə keçmir (restoran müştəriləri səslə əsasən AZ danışır)
+    if (!audioFile) {
+      return jsonResponse({ error: "No audio file provided" }, 400);
+    }
+
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const audioBuffer = Buffer.from(arrayBuffer);
+
+    const azureKey = process.env.AZURE_SPEECH_KEY;
+    const azureRegion = process.env.AZURE_SPEECH_REGION;
+
+    if (!azureKey || !azureRegion) {
+      return jsonResponse(
+        { error: "Azure Speech credentials not configured" },
+        500
+      );
+    }
+
+    // Use API version 2025-10-15 which supports phraseList biasing
+    const url = `https://${azureRegion}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15`;
+
+    const definition = {
       locales: ["az-AZ"],
       profanityFilterMode: "None",
-    });
+      phraseList: {
+        phrases: AZ_PHRASE_LIST,
+        // biasWeight: 1.0–2.0 range; 1.8 strongly favours listed phrases
+        biasWeight: 1.8,
+      },
+    };
 
-    const pre =
-      `--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="audio"; filename="audio.webm"\r\n` +
-      `Content-Type: audio/webm\r\n\r\n`;
-    const mid =
-      `\r\n--${boundary}\r\n` +
-      `Content-Disposition: form-data; name="definition"\r\n` +
-      `Content-Type: application/json\r\n\r\n` +
-      definition +
-      `\r\n--${boundary}--\r\n`;
+    const body = new FormData();
+    body.append("audio", new Blob([audioBuffer], { type: audioFile.type }), "audio.webm");
+    body.append("definition", JSON.stringify(definition));
 
-    const body = Buffer.concat([Buffer.from(pre, "utf8"), audioBuffer, Buffer.from(mid, "utf8")]);
-
-    const url = `https://${region}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2024-11-15`;
-
-    const azureRes = await fetch(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        "Ocp-Apim-Subscription-Key": key,
-        "Content-Type": `multipart/form-data; boundary=${boundary}`,
+        "Ocp-Apim-Subscription-Key": azureKey,
       },
       body,
     });
 
-    if (!azureRes.ok) {
-      const errText = await azureRes.text();
-      res.status(azureRes.status).json({ error: "Azure STT failed", details: errText });
-      return;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Azure STT error:", response.status, errorText);
+
+      // Fallback: retry with older API version if 2025-10-15 not supported in this region
+      if (response.status === 400 || response.status === 404) {
+        return await fallbackTranscribe(audioBuffer, audioFile.type, azureKey, azureRegion);
+      }
+
+      return jsonResponse(
+        { error: `Azure STT failed: ${response.status}` },
+        500
+      );
     }
 
-    const data = await azureRes.json();
-    // Fast transcription cavabı: combinedPhrases[0].text
-    const text =
-      data?.combinedPhrases?.[0]?.text ??
-      data?.combinedPhrases?.map((p: { text: string }) => p.text).join(" ") ??
+    const result = await response.json();
+    const transcript =
+      result?.combinedPhrases?.[0]?.text ||
+      result?.phrases?.map((p: { text: string }) => p.text).join(" ") ||
       "";
 
-    res.status(200).json({ text });
-  } catch (err) {
-    res.status(500).json({ error: "Transcription failed", details: String(err) });
+    return jsonResponse({ text: transcript });
+  } catch (error) {
+    console.error("STT error:", error);
+    return jsonResponse({ error: "Transcription failed" }, 500);
   }
+}
+
+// Fallback using older API version (without phraseList) if region doesn't support 2025-10-15
+async function fallbackTranscribe(
+  audioBuffer: Buffer,
+  mimeType: string,
+  azureKey: string,
+  azureRegion: string
+): Promise<Response> {
+  const url = `https://${azureRegion}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2024-11-15`;
+
+  const definition = {
+    locales: ["az-AZ"],
+    profanityFilterMode: "None",
+  };
+
+  const body = new FormData();
+  body.append("audio", new Blob([audioBuffer], { type: mimeType }), "audio.webm");
+  body.append("definition", JSON.stringify(definition));
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Ocp-Apim-Subscription-Key": azureKey },
+      body,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Azure STT fallback error:", response.status, errorText);
+      return jsonResponse({ error: `Azure STT failed: ${response.status}` }, 500);
+    }
+
+    const result = await response.json();
+    const transcript =
+      result?.combinedPhrases?.[0]?.text ||
+      result?.phrases?.map((p: { text: string }) => p.text).join(" ") ||
+      "";
+
+    return jsonResponse({ text: transcript });
+  } catch (err) {
+    console.error("Fallback STT error:", err);
+    return jsonResponse({ error: "Transcription failed" }, 500);
+  }
+}
+
+function jsonResponse(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 }
