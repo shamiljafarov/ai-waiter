@@ -168,30 +168,25 @@ export default function Chatbot() {
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsTranscribing(true);
     try {
-      const formData = new FormData();
-      formData.append("file", audioBlob, "audio.webm");
-      formData.append("model_id", "scribe_v1");
-      // ElevenLabs Scribe-in ağıllı dil təyini var (AZ/RU/ENG) — dil parametri vermirik
-      // Bu, Whisper-in ərəbcə ilə qarışdırma problemini həll edir
-      formData.append("tag_audio_events", "false");
-
-      const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+      // Audio-nu birbaşa Azure STT serverless endpoint-ə göndəririk (key serverdə qalır)
+      // Azure dil təyini yalnız AZ/RU/EN ilə məhduddur — səhv dil (ərəbcə və s.) çıxmır
+      const response = await fetch("/api/azure-stt", {
         method: "POST",
-        headers: {
-          "xi-api-key": import.meta.env.VITE_ELEVENLABS_API_KEY,
-        },
-        body: formData,
+        headers: { "Content-Type": "application/octet-stream" },
+        body: audioBlob,
       });
 
       if (!response.ok) {
-        console.error("ElevenLabs STT failed", await response.text());
+        console.error("Azure STT failed", await response.text());
         alert("Səs tanınmadı, yenidən cəhd edin.");
         return;
       }
 
       const data = await response.json();
-      if (data.text) {
+      if (data.text && data.text.trim()) {
         sendMessage(data.text);
+      } else {
+        alert("Səs tanınmadı, yenidən cəhd edin.");
       }
     } catch {
       alert("Səs tanınmadı, yenidən cəhd edin.");
