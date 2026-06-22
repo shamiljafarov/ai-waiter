@@ -31,14 +31,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Azure fast transcription multipart/form-data tələb edir
     const boundary = "----AzureFormBoundary" + Math.random().toString(36).slice(2);
     const definition = JSON.stringify({
-      locales: ["az-AZ", "ru-RU", "en-US"], // yalnız bu 3 dildən seçir
+      // Yalnız Azərbaycan dili — səsli mesaj həmişə AZ kimi tanınır,
+      // ruscaya/ərəbcəyə keçmir (restoran müştəriləri səslə əsasən AZ danışır)
+      locales: ["az-AZ"],
       profanityFilterMode: "None",
     });
 
     const pre =
       `--${boundary}\r\n` +
       `Content-Disposition: form-data; name="audio"; filename="audio.webm"\r\n` +
-      `Content-Type: application/octet-stream\r\n\r\n`;
+      `Content-Type: audio/webm\r\n\r\n`;
     const mid =
       `\r\n--${boundary}\r\n` +
       `Content-Disposition: form-data; name="definition"\r\n` +

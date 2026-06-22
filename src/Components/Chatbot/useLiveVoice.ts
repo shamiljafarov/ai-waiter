@@ -189,11 +189,38 @@ export function useLiveVoice({ systemPrompt, onUserTranscript, onModelTranscript
           systemInstruction: systemPrompt,
           inputAudioTranscription: {},
           outputAudioTranscription: {},
+          // Həmişə eyni qız səsi (Kore — sakit, peşəkar qadın səsi)
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Kore" },
+            },
+          },
         },
         callbacks: {
           onopen: async () => {
             await startMicrophone();
             setStatusSafe("listening");
+            // Başlananda bot özü salamlasın və özünü təqdim etsin
+            try {
+              session.sendClientContent({
+                turns: [
+                  {
+                    role: "user",
+                    parts: [
+                      {
+                        text:
+                          "(Sistem: müştəri indicə qoşuldu. Sən söhbəti BAŞLAT — qısa, mehriban səslə salam ver, " +
+                          "özünü Green Cafe-nin köməkçisi kimi təqdim et və müştərinin nə istədiyini soruş. " +
+                          "Yalnız rəsmi, ləhcəsiz Azərbaycan dilində danış.)",
+                      },
+                    ],
+                  },
+                ],
+                turnComplete: true,
+              });
+            } catch {
+              // salamlama göndərilə bilmədi, problem deyil
+            }
           },
           onmessage: (message: LiveServerMessage) => {
             const sc = message.serverContent;
