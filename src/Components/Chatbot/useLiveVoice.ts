@@ -28,6 +28,8 @@ export function useLiveVoice({
   const nextPlayTimeRef = useRef(0);
   const isSpeakingRef = useRef(false);
   const speakingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track all active AudioBufferSource nodes so we can stop them on barge-in
+  const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
 
   const setState = useCallback(
     (state: LiveState) => onStateChange?.(state),
@@ -58,6 +60,12 @@ export function useLiveVoice({
         const source = ctx.createBufferSource();
         source.buffer = buffer;
         source.connect(ctx.destination);
+
+        // Track this source so we can stop it on barge-in
+        activeSourcesRef.current.push(source);
+        source.onended = () => {
+          activeSourcesRef.current = activeSourcesRef.current.filter((s) => s !== source);
+        };
 
         // Schedule immediately if we're behind current time, otherwise chain
         const startAt = Math.max(ctx.currentTime, nextPlayTimeRef.current);
@@ -186,6 +194,11 @@ export function useLiveVoice({
 
             if (msg?.serverContent?.interrupted) {
               console.log("[Live] Interrupted, stopping playback");
+              // Stop all currently playing/scheduled audio nodes immediately
+              activeSourcesRef.current.forEach((s) => {
+                try { s.stop(); } catch { /* already stopped */ }
+              });
+              activeSourcesRef.current = [];
               // FIX: reset scheduled time so next audio starts immediately
               if (playbackCtxRef.current) {
                 nextPlayTimeRef.current = playbackCtxRef.current.currentTime;
@@ -276,6 +289,11 @@ export function useLiveVoice({
   const closeLiveVoice = useCallback(() => {
     sessionActiveRef.current = false;
     if (speakingTimeoutRef.current) clearTimeout(speakingTimeoutRef.current);
+    // Stop any playing audio immediately
+    activeSourcesRef.current.forEach((s) => {
+      try { s.stop(); } catch { /* already stopped */ }
+    });
+    activeSourcesRef.current = [];
     processorRef.current?.disconnect();
     sourceRef.current?.disconnect();
     streamRef.current?.getTracks().forEach((t) => t.stop());
