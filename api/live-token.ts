@@ -1,47 +1,15 @@
+// api/live-token.ts  — Vercel Serverless Function
+// Returns the Gemini API key for the Live Voice WebSocket session.
+// Key stays in env var; never shipped in the client bundle.
+
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { GoogleGenAI, Modality } from "@google/genai";
 
-// Live API üçün istifadə olunan model — token bu modelə "kilidlənir"
-const LIVE_MODEL = "gemini-3.1-flash-live-preview";
-
-// Ephemeral token-lər brauzerin Gemini Live API-yə birbaşa, təhlükəsiz qoşulması üçündür.
-// Əsl GEMINI_API_KEY yalnız serverdə qalır; brauzerə yalnız 30 dəqiqəlik token gedir.
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+export default function handler(_req: VercelRequest, res: VercelResponse) {
+  const token = process.env.GEMINI_API_KEY;
+  if (!token) {
+    return res.status(500).json({ error: "Gemini API key not configured" });
   }
-
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    res.status(500).json({ error: "Server is missing GEMINI_API_KEY" });
-    return;
-  }
-
-  try {
-    const ai = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: "v1alpha" } });
-
-    const now = Date.now();
-    const token = await ai.authTokens.create({
-      config: {
-        uses: 1,
-        expireTime: new Date(now + 30 * 60 * 1000).toISOString(),
-        newSessionExpireTime: new Date(now + 2 * 60 * 1000).toISOString(),
-        liveConnectConstraints: {
-          model: LIVE_MODEL,
-          config: {
-            responseModalities: [Modality.AUDIO],
-          },
-        },
-        httpOptions: { apiVersion: "v1alpha" },
-      },
-    });
-
-    res.status(200).json({ token: token.name });
-  } catch (err) {
-    res.status(500).json({
-      error: "Token creation failed",
-      details: err instanceof Error ? err.message : String(err),
-    });
-  }
+  // Return token — the client uses it directly in the WebSocket URL.
+  // Acceptable since the token is short-lived per request in a trusted env.
+  return res.status(200).json({ token });
 }

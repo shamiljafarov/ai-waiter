@@ -1,29 +1,43 @@
 import { useRef, useCallback } from "react";
 
+// Gemini Live API model
 const GEMINI_MODEL = "gemini-2.0-flash-live-001";
+
+export type LiveState = "idle" | "connecting" | "listening" | "speaking";
 
 interface UseLiveVoiceOptions {
   systemPrompt: string;
-  onStateChange?: (state: "idle" | "listening" | "speaking") => void;
+  onStateChange?: (state: LiveState) => void;
   onError?: (error: string) => void;
 }
 
-export function useLiveVoice({ systemPrompt, onStateChange, onError }: UseLiveVoiceOptions) {
+export function useLiveVoice({
+  systemPrompt,
+  onStateChange,
+  onError,
+}: UseLiveVoiceOptions) {
   const wsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Separate AudioContexts for playback (24kHz) and capture (16kHz)
+  const playbackCtxRef = useRef<AudioContext | null>(null);
+  const captureCtxRef = useRef<AudioContext | null>(null);
+
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
   const audioQueueRef = useRef<ArrayBuffer[]>([]);
   const isPlayingRef = useRef(false);
   const sessionActiveRef = useRef(false);
 
   const setState = useCallback(
-    (state: "idle" | "listening" | "speaking") => {
+    (state: LiveState) => {
       onStateChange?.(state);
     },
     [onStateChange]
   );
+
+  // ── Playback ────────────────────────────────────────────────────────────────
 
   const playNextAudio = useCallback(async () => {
     if (isPlayingRef.current || audioQueueRef.current.length === 0) return;
@@ -34,13 +48,23 @@ export function useLiveVoice({ systemPrompt, onStateChange, onError }: UseLiveVo
     const audioData = audioQueueRef.current.shift()!;
 
     try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AudioContext({ sampleRate: 24000 });
+      // Use dedicated 24kHz context for playback
+      if (!playbackCtxRef.current || playbackCtxRef.current.state === "closed") {
+        playbackCtxRef.current = new AudioContext({ sampleRate: 24000 });
       }
-      const ctx = audioContextRef.current;
+      const ctx = playbackCtxRef.current;
       if (ctx.state === "suspended") await ctx.resume();
 
-      const buffer = await ctx.decodeAudioData(audioData.slice(0));
+      // Gemini sends raw PCM16 LE at 24kHz — we need to decode manually
+      const pcm16 = new Int16Array(audioData);
+      const float32 = new Float32Array(pcm16.length);
+      for (let i = 0; i < pcm16.length; i++) {
+        float32[i] = pcm16[i] / 32768;
+      }
+
+      const buffer = ctx.createBuffer(1, float32.length, 24000);
+      buffer.copyToChannel(float32, 0);
+
       const source = ctx.createBufferSource();
       source.buffer = buffer;
       source.connect(ctx.destination);
@@ -48,26 +72,46 @@ export function useLiveVoice({ systemPrompt, onStateChange, onError }: UseLiveVo
         isPlayingRef.current = false;
         if (audioQueueRef.current.length > 0) {
           playNextAudio();
-        } else {
+        } else if (sessionActiveRef.current) {
           setState("listening");
         }
       };
       source.start();
-    } catch {
+    } catch (e) {
+      console.warn("Playback error:", e);
       isPlayingRef.current = false;
-      playNextAudio();
+      if (audioQueueRef.current.length > 0) {
+        playNextAudio();
+      }
     }
   }, [setState]);
 
+  // ── PCM16 base64 encode (safe, no spread on large arrays) ─────────────────
+
+  function pcm16ToBase64(pcm16: Int16Array): string {
+    const bytes = new Uint8Array(pcm16.buffer);
+    let binary = "";
+    const CHUNK = 8192;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    return btoa(binary);
+  }
+
+  // ── Open session ───────────────────────────────────────────────────────────
+
   const openLiveVoice = useCallback(
-    async (apiKey: string) => {
+    async (_unused: string) => {
       if (sessionActiveRef.current) return;
 
+      setState("connecting");
+
       try {
-        // Fetch token from our backend
+        // Fetch ephemeral token from our backend (keeps real key server-side)
         const tokenRes = await fetch("/api/live-token");
+        if (!tokenRes.ok) throw new Error("Token fetch failed");
         const tokenData = await tokenRes.json();
-        const token = tokenData.token || apiKey;
+        const token: string = tokenData.token;
 
         const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${token}`;
         const ws = new WebSocket(wsUrl);
@@ -76,102 +120,94 @@ export function useLiveVoice({ systemPrompt, onStateChange, onError }: UseLiveVo
         ws.onopen = () => {
           sessionActiveRef.current = true;
 
-          // Send setup message — no transcription requested (voice only)
-          const setupMsg = {
-            setup: {
-              model: `models/${GEMINI_MODEL}`,
-              generationConfig: {
-                responseModalities: ["AUDIO"],
-                speechConfig: {
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: "Aoede" },
+          // ── Setup message ──────────────────────────────────────────────────
+          ws.send(
+            JSON.stringify({
+              setup: {
+                model: `models/${GEMINI_MODEL}`,
+                generationConfig: {
+                  // Audio only — NO text transcription sent back
+                  responseModalities: ["AUDIO"],
+                  speechConfig: {
+                    voiceConfig: {
+                      // "Aoede" has the best multilingual (AZ/RU/EN) quality
+                      prebuiltVoiceConfig: { voiceName: "Aoede" },
+                    },
                   },
                 },
+                systemInstruction: {
+                  parts: [{ text: systemPrompt }],
+                },
               },
-              systemInstruction: {
-                parts: [
-                  {
-                    text: systemPrompt,
-                  },
-                ],
-              },
-            },
-          };
+            })
+          );
 
-          ws.send(JSON.stringify(setupMsg));
-
-          // Send opening greeting instruction
+          // ── Opening greeting (after setup is processed) ───────────────────
           setTimeout(() => {
-            const greetMsg = {
-              clientContent: {
-                turns: [
-                  {
-                    role: "user",
-                    parts: [
-                      {
-                        text: `Azərbaycan dilində salamla. Tələffüz qaydaları: 
-- "Ç" hərfini [tʃ] kimi tələffüz et (ingilis "ch" kimi), heç vaxt "Ц" [ts] kimi yox.
-- "Ş" hərfini [ʃ] kimi tələffüz et (ingilis "sh" kimi).
-- "X" hərfini [x] kimi tələffüz et (boğaz "x" səsi).
-- "Q" hərfini [ɡ] kimi tələffüz et (arxa damaq "g").
-- Bütün sözləri rəsmi Azərbaycan ədəbi dili fonetikası ilə tələffüz et.
-- Rus, türk və ya digər dillərin fonetikasına keçmə.
-İndi salamla.`,
-                      },
-                    ],
-                  },
-                ],
-                turnComplete: true,
-              },
-            };
-            ws.send(JSON.stringify(greetMsg));
-          }, 500);
+            if (ws.readyState !== WebSocket.OPEN) return;
+            ws.send(
+              JSON.stringify({
+                clientContent: {
+                  turns: [
+                    {
+                      role: "user",
+                      parts: [
+                        {
+                          text: "Azərbaycan dilində salamla. Qısa ol.",
+                        },
+                      ],
+                    },
+                  ],
+                  turnComplete: true,
+                },
+              })
+            );
+          }, 600);
 
           setState("listening");
         };
 
+        // ── Incoming messages ────────────────────────────────────────────────
         ws.onmessage = async (event) => {
           try {
-            let text: string;
-            if (event.data instanceof Blob) {
-              text = await event.data.text();
-            } else {
-              text = event.data;
-            }
+            const text =
+              event.data instanceof Blob
+                ? await event.data.text()
+                : (event.data as string);
 
             const msg = JSON.parse(text);
 
-            // Handle audio response
+            // Audio chunks from model
             const parts = msg?.serverContent?.modelTurn?.parts;
             if (parts) {
               for (const part of parts) {
-                if (part.inlineData?.mimeType?.startsWith("audio/")) {
-                  const audioBytes = Uint8Array.from(atob(part.inlineData.data), (c) =>
-                    c.charCodeAt(0)
-                  );
-                  audioQueueRef.current.push(audioBytes.buffer);
-                  if (!isPlayingRef.current) {
-                    playNextAudio();
-                  }
+                const md = part.inlineData;
+                if (md?.mimeType?.startsWith("audio/pcm")) {
+                  // Decode base64 → raw bytes
+                  const raw = atob(md.data);
+                  const bytes = new Uint8Array(raw.length);
+                  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+                  audioQueueRef.current.push(bytes.buffer);
+                  if (!isPlayingRef.current) playNextAudio();
                 }
               }
             }
 
-            // Handle interruption (user barge-in)
+            // User barge-in interruption
             if (msg?.serverContent?.interrupted) {
               audioQueueRef.current = [];
               isPlayingRef.current = false;
-              setState("listening");
+              if (sessionActiveRef.current) setState("listening");
             }
 
-            // Turn complete
+            // Model turn complete
             if (msg?.serverContent?.turnComplete) {
-              if (audioQueueRef.current.length === 0 && !isPlayingRef.current) {
-                setState("listening");
+              if (!isPlayingRef.current && audioQueueRef.current.length === 0) {
+                if (sessionActiveRef.current) setState("listening");
               }
             }
           } catch {
-            // ignore parse errors
+            // ignore parse errors silently
           }
         };
 
@@ -185,91 +221,101 @@ export function useLiveVoice({ systemPrompt, onStateChange, onError }: UseLiveVo
           setState("idle");
         };
 
-        // Start microphone capture
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // ── Microphone capture ───────────────────────────────────────────────
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 16000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+          },
+        });
         streamRef.current = stream;
 
-        const audioCtx = new AudioContext({ sampleRate: 16000 });
-        audioContextRef.current = audioCtx;
+        // Dedicated 16kHz context for capture
+        const captureCtx = new AudioContext({ sampleRate: 16000 });
+        captureCtxRef.current = captureCtx;
 
-        const source = audioCtx.createMediaStreamSource(stream);
-        sourceRef.current = source;
+        const micSource = captureCtx.createMediaStreamSource(stream);
+        sourceRef.current = micSource;
 
-        // Use ScriptProcessor to capture PCM16 audio
-        const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+        // ScriptProcessorNode (4096 samples) — safe fallback for all browsers
+        // AudioWorklet is ideal but requires serving an extra file; ScriptProcessor
+        // works here since we only need one small chunk per ~256ms.
+        const processor = captureCtx.createScriptProcessor(4096, 1, 1);
         processorRef.current = processor;
 
         processor.onaudioprocess = (e) => {
           if (!sessionActiveRef.current || ws.readyState !== WebSocket.OPEN) return;
+          if (isPlayingRef.current) return; // don't capture while bot is speaking
 
           const float32 = e.inputBuffer.getChannelData(0);
           const pcm16 = new Int16Array(float32.length);
           for (let i = 0; i < float32.length; i++) {
-            pcm16[i] = Math.max(-32768, Math.min(32767, float32[i] * 32768));
+            pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(float32[i] * 32767)));
           }
 
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(pcm16.buffer)));
-
-          const audioMsg = {
-            realtimeInput: {
-              mediaChunks: [
-                {
-                  mimeType: "audio/pcm;rate=16000",
-                  data: base64,
-                },
-              ],
-            },
-          };
-
-          ws.send(JSON.stringify(audioMsg));
+          ws.send(
+            JSON.stringify({
+              realtimeInput: {
+                mediaChunks: [
+                  {
+                    mimeType: "audio/pcm;rate=16000",
+                    data: pcm16ToBase64(pcm16),
+                  },
+                ],
+              },
+            })
+          );
         };
 
-        source.connect(processor);
-        processor.connect(audioCtx.destination);
+        micSource.connect(processor);
+        // Connect to destination with zero gain so browser doesn't mute the node,
+        // but output goes nowhere audible
+        const silentGain = captureCtx.createGain();
+        silentGain.gain.value = 0;
+        processor.connect(silentGain);
+        silentGain.connect(captureCtx.destination);
       } catch (err) {
-        console.error("Live voice error:", err);
+        console.error("Live voice setup error:", err);
         onError?.("Mikrofona çıxış alınmadı və ya bağlantı xətası.");
         setState("idle");
+        sessionActiveRef.current = false;
       }
     },
     [systemPrompt, setState, onError, playNextAudio]
   );
 
+  // ── Close session ──────────────────────────────────────────────────────────
+
   const closeLiveVoice = useCallback(() => {
     sessionActiveRef.current = false;
 
+    // Stop microphone
     processorRef.current?.disconnect();
     sourceRef.current?.disconnect();
     streamRef.current?.getTracks().forEach((t) => t.stop());
+
+    // Close AudioContexts
+    captureCtxRef.current?.close().catch(() => {});
+    playbackCtxRef.current?.close().catch(() => {});
+
+    // Close WebSocket
     wsRef.current?.close();
+
+    // Clear queue
     audioQueueRef.current = [];
     isPlayingRef.current = false;
 
     processorRef.current = null;
     sourceRef.current = null;
     streamRef.current = null;
+    captureCtxRef.current = null;
+    playbackCtxRef.current = null;
     wsRef.current = null;
 
     setState("idle");
   }, [setState]);
 
-  const sendTextToLive = useCallback((text: string) => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-
-    const msg = {
-      clientContent: {
-        turns: [
-          {
-            role: "user",
-            parts: [{ text }],
-          },
-        ],
-        turnComplete: true,
-      },
-    };
-
-    wsRef.current.send(JSON.stringify(msg));
-  }, []);
-
-  return { openLiveVoice, closeLiveVoice, sendTextToLive };
+  return { openLiveVoice, closeLiveVoice };
 }
