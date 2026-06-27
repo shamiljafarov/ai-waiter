@@ -44,10 +44,16 @@ export async function POST(req: Request) {
                       },
                     },
                     {
-                      text: `Transcribe this audio exactly as spoken. 
-The speaker may use Azerbaijani (including colloquial/dialectal forms like "nətərsən", "içmək→işmək", "bir şey→bişey", "getmək→getmey", slang, incomplete words), Russian, or English.
-Return ONLY the transcribed text — no explanations, no corrections, no punctuation changes.
-Preserve the original words exactly as said, even if informal or grammatically incorrect.`,
+                      text: `Listen to this audio and transcribe it into natural, standard Azerbaijani text.
+
+Rules:
+- The speaker may use colloquial Azerbaijani, Russian-Azerbaijani mix, or accented speech — normalize it all into correct literary Azerbaijani.
+- Fix phonetic errors: "işmək" → "içmək", "getmey" → "getmək", "nətərsən" → "necəsən", "bişey" → "bir şey", "qəşəy" → "gözəl", etc.
+- Replace Russian food/drink words with Azerbaijani: "supu" → "şorbası", "kotleti" → "kotlet", "salat" → "salat" (keep if same), "çay" stays "çay".
+- If the speaker mixes Russian words into Azerbaijani sentences, translate those Russian words to Azerbaijani and write the whole sentence in Azerbaijani.
+- If the speaker speaks fully in Russian, transcribe in Russian (standard).
+- If the speaker speaks fully in English, transcribe in English (standard).
+- Return ONLY the final clean transcribed text. No explanations, no quotes, no extra text.`,
                     },
                   ],
                 },
