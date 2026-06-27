@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     };
 
     const body = new FormData();
-    body.append("audio", new Blob([audioBuffer], { type: mimeType }), "audio.webm");
+    body.append("audio", new Blob([new Uint8Array(audioBuffer)], { type: mimeType }), "audio.webm");
     body.append("definition", JSON.stringify(definition));
 
     const response = await fetch(url, {
@@ -111,7 +111,7 @@ async function fallbackTranscribe(
   };
 
   const body = new FormData();
-  body.append("audio", new Blob([audioBuffer], { type: mimeType }), "audio.webm");
+  body.append("audio", new Blob([new Uint8Array(audioBuffer)], { type: mimeType }), "audio.webm");
   body.append("definition", JSON.stringify(definition));
 
   try {
