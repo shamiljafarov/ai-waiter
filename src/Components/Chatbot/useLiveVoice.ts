@@ -143,22 +143,17 @@ export function useLiveVoice({
               systemInstruction: {
                 parts: [{ text: systemPrompt }],
               },
+              // FIX: faster VAD = model responds sooner after user stops speaking
+              realtimeInputConfig: {
+                automaticActivityDetection: {
+                  disabled: false,
+                  startOfSpeechSensitivity: "START_SENSITIVITY_HIGH",
+                  endOfSpeechSensitivity: "END_SENSITIVITY_HIGH",
+                },
+              },
             },
           }));
 
-          setTimeout(() => {
-            if (ws.readyState !== WebSocket.OPEN) return;
-            console.log("[Live] Sending greeting...");
-            ws.send(JSON.stringify({
-              clientContent: {
-                turns: [{
-                  role: "user",
-                  parts: [{ text: "Azərbaycan dilində qısa salamla." }],
-                }],
-                turnComplete: true,
-              },
-            }));
-          }, 800);
 
           setState("listening");
         };
