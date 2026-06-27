@@ -32,18 +32,31 @@ const AZ_PHRASE_LIST: string[] = [
 
 export async function POST(req: Request) {
   try {
-    const formData = await req.formData();
-    const audioFile = formData.get("audio") as File;
+    let audioBuffer: Buffer;
+    let mimeType = "audio/webm";
 
-    if (!audioFile) {
-      return jsonResponse({ error: "No audio file provided" }, 400);
+    const contentType = req.headers.get("content-type") ?? "";
+
+    if (contentType.includes("multipart/form-data")) {
+      // Frontend sent FormData with an "audio" field
+      const formData = await req.formData();
+      const audioFile = formData.get("audio") as File;
+      if (!audioFile) {
+        return jsonResponse({ error: "No audio file provided" }, 400);
+      }
+      audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+      mimeType = audioFile.type || mimeType;
+    } else {
+      // Frontend sent raw binary body (application/octet-stream)
+      audioBuffer = Buffer.from(await req.arrayBuffer());
+      if (contentType && !contentType.includes("octet-stream")) {
+        mimeType = contentType.split(";")[0].trim();
+      }
     }
 
-    const arrayBuffer = await audioFile.arrayBuffer();
-    const audioBuffer = Buffer.from(arrayBuffer);
-
-    const azureKey = process.env.AZURE_SPEECH_KEY;
-    const azureRegion = process.env.AZURE_SPEECH_REGION;
+    // FIX: use the actual Vercel env variable names (AZURE_STT_KEY / AZURE_STT_REGION)
+    const azureKey = process.env.AZURE_STT_KEY;
+    const azureRegion = process.env.AZURE_STT_REGION;
 
     if (!azureKey || !azureRegion) {
       return jsonResponse(
@@ -60,13 +73,12 @@ export async function POST(req: Request) {
       profanityFilterMode: "None",
       phraseList: {
         phrases: AZ_PHRASE_LIST,
-        // biasWeight: 1.0–2.0 range; 1.8 strongly favours listed phrases
         biasWeight: 1.8,
       },
     };
 
     const body = new FormData();
-    body.append("audio", new Blob([audioBuffer], { type: audioFile.type }), "audio.webm");
+    body.append("audio", new Blob([audioBuffer], { type: mimeType }), "audio.webm");
     body.append("definition", JSON.stringify(definition));
 
     const response = await fetch(url, {
@@ -83,7 +95,7 @@ export async function POST(req: Request) {
 
       // Fallback: retry with older API version if 2025-10-15 not supported in this region
       if (response.status === 400 || response.status === 404) {
-        return await fallbackTranscribe(audioBuffer, audioFile.type, azureKey, azureRegion);
+        return await fallbackTranscribe(audioBuffer, mimeType, azureKey, azureRegion);
       }
 
       return jsonResponse(
