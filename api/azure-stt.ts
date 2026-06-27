@@ -1,31 +1,22 @@
 // Azerbaijani menu items + common restaurant/conversation words for phrase biasing
 const AZ_PHRASE_LIST: string[] = [
-  // Common greetings / conversation
   "salam", "necəsən", "necəsiz", "xahiş eliyirəm", "təşəkkür eliyirəm",
   "bəli", "xeyr", "zəhmət olmasa", "buyurun", "əlbətdə",
-  // Menu & ordering
   "menyuya baxmax", "sifariş verməy", "hesab", "çek",
   "içgi", "içməy", "yeməy", "tort", "desert",
-  // Soups
   "supu", "doğa", "düşbərə", "piti", "bozbaş",
   "göbələy supu", "qaymağlı göbələy supu",
-  // Salads / starters
   "qəlyanalaltı", "salat", "Çoban salatı", "Yunan salatı",
   "kəsmiyli", "pendir", "zeytun",
-  // Mains
   "lülə kabab", "tava kabab", "tikə kabab", "şiş kabab", "toyuğ", "balığ",
   "küfdə", "dolma", "badımcan dolması", "bibər dolması",
   "plov", "şəkərri plov", "qaynana barmağı",
   "ləvəngi", "qutab", "ətdi qutab",
-  // Sides / extras
   "lavaş", "çörəy", "düyü", "kartof",
   "göyərti", "soğan", "pomidor", "xiyar",
-  // Drinks
   "çay", "qəhvə", "ayran", "şirə", "limonat",
   "su", "isdi su", "soyuğ su",
-  // Desserts
   "paxlava", "şəkərbura", "halva", "dondurma",
-  // Price / quantity
   "neçiyədi", "nə qədər", "bir", "iki", "üç", "dörd", "beş",
   "ədəd", "porsiya", "böyüy", "kiçiy",
 ];
@@ -38,7 +29,6 @@ export async function POST(req: Request) {
     const contentType = req.headers.get("content-type") ?? "";
 
     if (contentType.includes("multipart/form-data")) {
-      // Frontend sent FormData with an "audio" field
       const formData = await req.formData();
       const audioFile = formData.get("audio") as File;
       if (!audioFile) {
@@ -47,33 +37,29 @@ export async function POST(req: Request) {
       audioBuffer = Buffer.from(await audioFile.arrayBuffer());
       mimeType = audioFile.type || mimeType;
     } else {
-      // Frontend sent raw binary body (application/octet-stream)
       audioBuffer = Buffer.from(await req.arrayBuffer());
       if (contentType && !contentType.includes("octet-stream")) {
         mimeType = contentType.split(";")[0].trim();
       }
     }
 
-    // FIX: use the actual Vercel env variable names (AZURE_STT_KEY / AZURE_STT_REGION)
+    // FIX: correct env variable names matching Vercel settings
     const azureKey = process.env.AZURE_STT_KEY;
     const azureRegion = process.env.AZURE_STT_REGION;
 
     if (!azureKey || !azureRegion) {
-      return jsonResponse(
-        { error: "Azure Speech credentials not configured" },
-        500
-      );
+      return jsonResponse({ error: "Azure Speech credentials not configured" }, 500);
     }
 
-    // Use API version 2025-10-15 which supports phraseList biasing
+    // FIX: support AZ + RU + EN — send all three locales
     const url = `https://${azureRegion}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15`;
 
     const definition = {
-      locales: ["az-AZ"],
+      locales: ["az-AZ", "ru-RU", "en-US"],
       profanityFilterMode: "None",
       phraseList: {
         phrases: AZ_PHRASE_LIST,
-        biasWeight: 1.8,
+        biasWeight: 1.5,
       },
     };
 
@@ -83,9 +69,7 @@ export async function POST(req: Request) {
 
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Ocp-Apim-Subscription-Key": azureKey,
-      },
+      headers: { "Ocp-Apim-Subscription-Key": azureKey },
       body,
     });
 
@@ -93,15 +77,11 @@ export async function POST(req: Request) {
       const errorText = await response.text();
       console.error("Azure STT error:", response.status, errorText);
 
-      // Fallback: retry with older API version if 2025-10-15 not supported in this region
       if (response.status === 400 || response.status === 404) {
         return await fallbackTranscribe(audioBuffer, mimeType, azureKey, azureRegion);
       }
 
-      return jsonResponse(
-        { error: `Azure STT failed: ${response.status}` },
-        500
-      );
+      return jsonResponse({ error: `Azure STT failed: ${response.status}` }, 500);
     }
 
     const result = await response.json();
@@ -117,7 +97,6 @@ export async function POST(req: Request) {
   }
 }
 
-// Fallback using older API version (without phraseList) if region doesn't support 2025-10-15
 async function fallbackTranscribe(
   audioBuffer: Buffer,
   mimeType: string,
@@ -127,7 +106,7 @@ async function fallbackTranscribe(
   const url = `https://${azureRegion}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2024-11-15`;
 
   const definition = {
-    locales: ["az-AZ"],
+    locales: ["az-AZ", "ru-RU", "en-US"],
     profanityFilterMode: "None",
   };
 

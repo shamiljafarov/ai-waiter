@@ -18,7 +18,6 @@ export function useLiveVoice({
 }: UseLiveVoiceOptions) {
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Separate AudioContexts for playback (24kHz) and capture (16kHz)
   const playbackCtxRef = useRef<AudioContext | null>(null);
   const captureCtxRef = useRef<AudioContext | null>(null);
 
@@ -48,14 +47,12 @@ export function useLiveVoice({
     const audioData = audioQueueRef.current.shift()!;
 
     try {
-      // Use dedicated 24kHz context for playback
       if (!playbackCtxRef.current || playbackCtxRef.current.state === "closed") {
         playbackCtxRef.current = new AudioContext({ sampleRate: 24000 });
       }
       const ctx = playbackCtxRef.current;
       if (ctx.state === "suspended") await ctx.resume();
 
-      // Gemini sends raw PCM16 LE at 24kHz — we need to decode manually
       const pcm16 = new Int16Array(audioData);
       const float32 = new Float32Array(pcm16.length);
       for (let i = 0; i < pcm16.length; i++) {
@@ -86,7 +83,7 @@ export function useLiveVoice({
     }
   }, [setState]);
 
-  // ── PCM16 base64 encode (safe, no spread on large arrays) ─────────────────
+  // ── PCM16 base64 encode ───────────────────────────────────────────────────
 
   function pcm16ToBase64(pcm16: Int16Array): string {
     const bytes = new Uint8Array(pcm16.buffer);
@@ -107,32 +104,42 @@ export function useLiveVoice({
       setState("connecting");
 
       try {
-        // Fetch ephemeral token from our backend (keeps real key server-side)
         const tokenRes = await fetch("/api/live-token");
         if (!tokenRes.ok) throw new Error("Token fetch failed");
         const tokenData = await tokenRes.json();
         const token: string = tokenData.token;
 
-        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${token}`;
+        // FIX: use v1alpha which is the correct endpoint for BidiGenerateContent
+        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${token}`;
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
+        // FIX: add connection timeout — if no open event in 8s, fail gracefully
+        const connectTimeout = setTimeout(() => {
+          if (ws.readyState !== WebSocket.OPEN) {
+            ws.close();
+            onError?.("Canlı səs bağlantısı zaman aşımına uğradı. Yenidən cəhd edin.");
+            setState("idle");
+          }
+        }, 8000);
+
         ws.onopen = () => {
+          clearTimeout(connectTimeout);
           sessionActiveRef.current = true;
 
-          // ── Setup message ──────────────────────────────────────────────────
+          // FIX: add languageCodes for AZ/RU/EN multilingual support
           ws.send(
             JSON.stringify({
               setup: {
                 model: `models/${GEMINI_MODEL}`,
                 generationConfig: {
-                  // Audio only — NO text transcription sent back
                   responseModalities: ["AUDIO"],
                   speechConfig: {
                     voiceConfig: {
-                      // "Aoede" has the best multilingual (AZ/RU/EN) quality
                       prebuiltVoiceConfig: { voiceName: "Aoede" },
                     },
+                    // FIX: explicitly declare supported languages
+                    languageCodes: ["az-AZ", "ru-RU", "en-US"],
                   },
                 },
                 systemInstruction: {
@@ -142,7 +149,6 @@ export function useLiveVoice({
             })
           );
 
-          // ── Opening greeting (after setup is processed) ───────────────────
           setTimeout(() => {
             if (ws.readyState !== WebSocket.OPEN) return;
             ws.send(
@@ -177,13 +183,11 @@ export function useLiveVoice({
 
             const msg = JSON.parse(text);
 
-            // Audio chunks from model
             const parts = msg?.serverContent?.modelTurn?.parts;
             if (parts) {
               for (const part of parts) {
                 const md = part.inlineData;
                 if (md?.mimeType?.startsWith("audio/pcm")) {
-                  // Decode base64 → raw bytes
                   const raw = atob(md.data);
                   const bytes = new Uint8Array(raw.length);
                   for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
@@ -193,30 +197,30 @@ export function useLiveVoice({
               }
             }
 
-            // User barge-in interruption
             if (msg?.serverContent?.interrupted) {
               audioQueueRef.current = [];
               isPlayingRef.current = false;
               if (sessionActiveRef.current) setState("listening");
             }
 
-            // Model turn complete
             if (msg?.serverContent?.turnComplete) {
               if (!isPlayingRef.current && audioQueueRef.current.length === 0) {
                 if (sessionActiveRef.current) setState("listening");
               }
             }
           } catch {
-            // ignore parse errors silently
+            // ignore parse errors
           }
         };
 
         ws.onerror = () => {
+          clearTimeout(connectTimeout);
           onError?.("Canlı səs bağlantısında xəta baş verdi.");
           setState("idle");
         };
 
         ws.onclose = () => {
+          clearTimeout(connectTimeout);
           sessionActiveRef.current = false;
           setState("idle");
         };
@@ -232,22 +236,18 @@ export function useLiveVoice({
         });
         streamRef.current = stream;
 
-        // Dedicated 16kHz context for capture
         const captureCtx = new AudioContext({ sampleRate: 16000 });
         captureCtxRef.current = captureCtx;
 
         const micSource = captureCtx.createMediaStreamSource(stream);
         sourceRef.current = micSource;
 
-        // ScriptProcessorNode (4096 samples) — safe fallback for all browsers
-        // AudioWorklet is ideal but requires serving an extra file; ScriptProcessor
-        // works here since we only need one small chunk per ~256ms.
         const processor = captureCtx.createScriptProcessor(4096, 1, 1);
         processorRef.current = processor;
 
         processor.onaudioprocess = (e) => {
           if (!sessionActiveRef.current || ws.readyState !== WebSocket.OPEN) return;
-          if (isPlayingRef.current) return; // don't capture while bot is speaking
+          if (isPlayingRef.current) return;
 
           const float32 = e.inputBuffer.getChannelData(0);
           const pcm16 = new Int16Array(float32.length);
@@ -270,8 +270,6 @@ export function useLiveVoice({
         };
 
         micSource.connect(processor);
-        // Connect to destination with zero gain so browser doesn't mute the node,
-        // but output goes nowhere audible
         const silentGain = captureCtx.createGain();
         silentGain.gain.value = 0;
         processor.connect(silentGain);
@@ -291,19 +289,15 @@ export function useLiveVoice({
   const closeLiveVoice = useCallback(() => {
     sessionActiveRef.current = false;
 
-    // Stop microphone
     processorRef.current?.disconnect();
     sourceRef.current?.disconnect();
     streamRef.current?.getTracks().forEach((t) => t.stop());
 
-    // Close AudioContexts
     captureCtxRef.current?.close().catch(() => {});
     playbackCtxRef.current?.close().catch(() => {});
 
-    // Close WebSocket
     wsRef.current?.close();
 
-    // Clear queue
     audioQueueRef.current = [];
     isPlayingRef.current = false;
 
