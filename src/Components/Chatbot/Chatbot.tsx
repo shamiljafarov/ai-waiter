@@ -293,7 +293,7 @@ export default function Chatbot() {
   const transcribeAndSend = async (blob: Blob) => {
     setIsTranscribing(true);
     try {
-      const res = await fetch("/api/azure-stt", {
+      const res = await fetch("/api/gemini-stt", {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
         body: blob,
