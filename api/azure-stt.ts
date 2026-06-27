@@ -1,6 +1,6 @@
 // Azerbaijani menu items + common restaurant/conversation words for phrase biasing
 const AZ_PHRASE_LIST: string[] = [
-  "salam", "necəsən", "necəsiz", "xahiş eliyirəm", "təşəkkür eliyirəm",
+  "salam", "necəsən", "nətərsən", "necəsiz", "xahiş eliyirəm", "təşəkkür eliyirəm",
   "bəli", "xeyr", "zəhmət olmasa", "buyurun", "əlbətdə",
   "menyuya baxmax", "sifariş verməy", "hesab", "çek",
   "içgi", "içməy", "yeməy", "tort", "desert",

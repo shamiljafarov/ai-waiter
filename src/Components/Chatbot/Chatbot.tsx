@@ -137,7 +137,10 @@ Yalnız restoran mövzusu. Digər mövzulara cavab vermə.
 
 CAVAB FORMATI: Qısa, mehriban. 1-3 cümlə. Yalnız mətn — heç bir markdown.
 
-RESTORAN: Green Cafe, Şıxov, Green City Resort. Saat: 09:00–23:00.`;
+RESTORAN: Green Cafe, Şıxov, Green City Resort. Saat: 09:00–23:00. Tel: +994 99 206 20 84.
+
+MENYUNU ƏZBƏRLƏ — bütün qiymətləri bilməlisən. Müştəri soruşanda dəqiq cavab ver:
+${MENU_TEXT}`;
 
 // ─── Quick reply chips (3 languages) ─────────────────────────────────────────
 
