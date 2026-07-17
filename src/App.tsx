@@ -16,6 +16,12 @@ type Screen = "landing" | "menu" | "aiwaiter" | "checkout";
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [screen, setScreen] = useState<Screen>("landing");
+  const [previousScreen, setPreviousScreen] = useState<Screen>("landing");
+
+  const navigate = (next: Screen) => {
+    setPreviousScreen(screen);
+    setScreen(next);
+  };
 
   const categories = useMemo(
     () =>
@@ -76,7 +82,7 @@ export default function App() {
   return (
     <OrderProvider>
       {screen !== "aiwaiter" && (
-        <Header onBack={screen === "menu" ? () => setScreen("landing") : undefined} />
+        <Header onBack={screen === "menu" ? () => navigate("landing") : undefined} />
       )}
 
       {showSplash && (
@@ -108,9 +114,15 @@ export default function App() {
           </>
         )}
 
-        {screen === "landing" && <Landing onNavigate={setScreen} />}
-        {screen === "aiwaiter" && <AiWaiterScreen onNavigate={setScreen} />}
-        {screen === "checkout" && <Checkout onNavigate={setScreen} />}
+        {screen === "landing" && <Landing onNavigate={navigate} />}
+
+        <div className={screen === "aiwaiter" ? "" : "hidden"}>
+          <AiWaiterScreen onNavigate={navigate} />
+        </div>
+
+        {screen === "checkout" && (
+          <Checkout onBack={() => setScreen(previousScreen)} />
+        )}
       </div>
 
       {screen === "menu" && <Footer />}

@@ -1,13 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { useOrder } from "../../context/OrderContext";
 
-type Screen = "landing" | "menu" | "aiwaiter" | "checkout";
-
 type CheckoutProps = {
-  onNavigate: (screen: Screen) => void;
+  onBack: () => void;
 };
 
-export default function Checkout({ onNavigate }: CheckoutProps) {
+export default function Checkout({ onBack }: CheckoutProps) {
   const { t } = useTranslation();
   const { orderItems, subtotal, serviceFee, total, totalKcal } = useOrder();
 
@@ -40,7 +38,7 @@ export default function Checkout({ onNavigate }: CheckoutProps) {
 
       <button
         type="button"
-        onClick={() => onNavigate("menu")}
+        onClick={onBack}
         className="self-start rounded-2xl border border-stone-200 bg-white px-6 py-3 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
       >
         Geri
