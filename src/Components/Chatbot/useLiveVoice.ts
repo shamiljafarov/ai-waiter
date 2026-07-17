@@ -1,19 +1,76 @@
 import { useRef, useCallback } from "react";
+import type { OrderCommand } from "../../types/order";
 
 const GEMINI_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025";
 
 export type LiveState = "idle" | "connecting" | "listening" | "speaking";
 
+// ── Order tool declarations (Gemini Live function calling) ──────────────────
+// Wire format matches the BidiGenerateContent JSON API (setup.tools[].
+// functionDeclarations[]) used by the @google/genai SDK's Live client.
+const ORDER_TOOLS = [
+  {
+    functionDeclarations: [
+      {
+        name: "add_to_order",
+        description: "Add a menu item to the guest's order",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            item_id: {
+              type: "NUMBER",
+              description:
+                "The numeric [id:N] of the menu item, from the MENU list in the system prompt",
+            },
+            quantity: {
+              type: "NUMBER",
+              description: "How many of the item to add. Defaults to 1 if not stated.",
+            },
+          },
+          required: ["item_id", "quantity"],
+        },
+      },
+      {
+        name: "remove_from_order",
+        description: "Remove or reduce a menu item in the guest's order",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            item_id: {
+              type: "NUMBER",
+              description:
+                "The numeric [id:N] of the menu item, from the MENU list in the system prompt",
+            },
+            quantity: {
+              type: "NUMBER",
+              description: "How many of the item to remove. Defaults to 1 if not stated.",
+            },
+          },
+          required: ["item_id", "quantity"],
+        },
+      },
+    ],
+  },
+];
+
+interface LiveFunctionCall {
+  id?: string;
+  name?: string;
+  args?: Record<string, unknown>;
+}
+
 interface UseLiveVoiceOptions {
   systemPrompt: string;
   onStateChange?: (state: LiveState) => void;
   onError?: (error: string) => void;
+  onOrderCommand?: (command: OrderCommand) => void;
 }
 
 export function useLiveVoice({
   systemPrompt,
   onStateChange,
   onError,
+  onOrderCommand,
 }: UseLiveVoiceOptions) {
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -151,6 +208,7 @@ export function useLiveVoice({
               systemInstruction: {
                 parts: [{ text: systemPrompt }],
               },
+              tools: ORDER_TOOLS,
               // FIX: faster VAD = model responds sooner after user stops speaking
               realtimeInputConfig: {
                 automaticActivityDetection: {
@@ -211,6 +269,36 @@ export function useLiveVoice({
             if (msg?.serverContent?.turnComplete) {
               console.log("[Live] Turn complete");
               // Speaking state is handled by the timeout in scheduleAudioChunk
+            }
+
+            const functionCalls: LiveFunctionCall[] | undefined =
+              msg?.toolCall?.functionCalls;
+            if (functionCalls?.length) {
+              const functionResponses = functionCalls.map((call) => {
+                const commandType =
+                  call.name === "add_to_order"
+                    ? "add"
+                    : call.name === "remove_from_order"
+                    ? "remove"
+                    : null;
+
+                if (commandType) {
+                  const itemId = Number(call.args?.item_id);
+                  const rawQty = Number(call.args?.quantity);
+                  const quantity = Number.isFinite(rawQty) && rawQty > 0 ? rawQty : 1;
+                  if (Number.isFinite(itemId)) {
+                    onOrderCommand?.({ type: commandType, id: itemId, quantity });
+                  }
+                }
+
+                return {
+                  id: call.id,
+                  name: call.name,
+                  response: { output: { success: true } },
+                };
+              });
+
+              ws.send(JSON.stringify({ toolResponse: { functionResponses } }));
             }
           } catch {
             // ignore parse errors
@@ -281,7 +369,7 @@ export function useLiveVoice({
         sessionActiveRef.current = false;
       }
     },
-    [systemPrompt, setState, onError, scheduleAudioChunk]
+    [systemPrompt, setState, onError, onOrderCommand, scheduleAudioChunk]
   );
 
   // ── Close session ─────────────────────────────────────────────────────────

@@ -85,6 +85,7 @@ export default function AiWaiterScreen({ onNavigate }: AiWaiterScreenProps) {
     systemPrompt: LIVE_SYSTEM_PROMPT,
     onStateChange: (state) => setLiveStatus(state),
     onError: (err) => console.error("Live voice error:", err),
+    onOrderCommand: (command) => applyOrderCommands([command]),
   });
 
   const openLive = () => {
