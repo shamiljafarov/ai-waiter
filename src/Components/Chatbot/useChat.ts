@@ -1,0 +1,231 @@
+import { useEffect, useRef, useState } from "react";
+import { menuData } from "../../data/menuData";
+import azTranslations from "../i18n/locales/az.json";
+import ruTranslations from "../i18n/locales/ru.json";
+import enTranslations from "../i18n/locales/en.json";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
+// ─── Translation helpers ──────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getNestedValue(obj: any, path: string): string | undefined {
+  const parts = path.split(".");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let node: any = obj;
+  for (const part of parts) {
+    if (node == null) return undefined;
+    node = node[part];
+  }
+  return typeof node === "string" ? node : undefined;
+}
+
+// Build menu summary in all three languages for the system prompt
+function buildMenuSummary(): string {
+  const lines: string[] = [];
+
+  for (const category of menuData) {
+    const catAz = getNestedValue(azTranslations, category.titleKey) ?? category.key;
+    const catEn = getNestedValue(enTranslations, category.titleKey) ?? category.key;
+    const catRu = getNestedValue(ruTranslations, category.titleKey) ?? category.key;
+
+    lines.push(`\n[${catAz} / ${catEn} / ${catRu}]`);
+
+    for (const item of category.items) {
+      const nameAz = getNestedValue(azTranslations, item.nameKey) ?? item.nameKey;
+      const nameEn = getNestedValue(enTranslations, item.nameKey) ?? item.nameKey;
+      const nameRu = getNestedValue(ruTranslations, item.nameKey) ?? item.nameKey;
+      const weight = item.weight ? ` (${item.weight})` : "";
+      lines.push(`  • ${nameAz} / ${nameEn} / ${nameRu} — ${item.price}₼${weight}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+const MENU_TEXT = buildMenuSummary();
+
+// ─── Strip markdown from assistant replies ────────────────────────────────────
+
+export function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/`{1,3}([^`]*)`{1,3}/g, "$1")
+    .trim();
+}
+
+// ─── System Prompts ───────────────────────────────────────────────────────────
+
+/**
+ * Chat system prompt.
+ * Key improvements for Azerbaijani:
+ *  - Explicit instruction to reply in the EXACT language the user writes in
+ *  - Menu items listed in all three languages so the model can match them
+ *  - No markdown, short replies
+ */
+export const CHAT_SYSTEM_PROMPT = `You are the AI waiter of Green Cafe restaurant. Your ONLY job is to help guests with the menu, food and drinks, prices, allergens, and restaurant information.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LANGUAGE RULE — ABSOLUTE PRIORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Detect the language of the user's message and reply IN THAT SAME LANGUAGE.
+• If the user writes in Azerbaijani → reply only in Azerbaijani
+• If the user writes in Russian → reply only in Russian
+• If the user writes in English → reply only in English
+Never mix languages in one reply. Never switch unless the user switches first.
+
+When speaking Azerbaijani:
+- Use proper literary Azerbaijani (ədəbi dil), not Turkish or Russian phonetics.
+- Use the formal "Siz" form of address.
+- Dish names: use the Azerbaijani names from the menu below.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SCOPE — STRICT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You ONLY discuss:
+• The menu (food, drinks, prices, portions, ingredients)
+• Order recommendations and upselling
+• Restaurant info: hours 09:00–23:00, address: Şıxov qəs., Green City Resort, phone: +994 99 206 20 84
+
+For ANY other topic (science, politics, coding, jokes, personal questions, etc.) reply:
+- AZ: "Üzr istəyirəm, mən yalnız Green Cafe menyusu ilə kömək edə bilərəm. Sizə nə təklif edim?"
+- RU: "Извините, я могу помочь только с меню Green Cafe. Что вам предложить?"
+- EN: "Sorry, I can only help with the Green Cafe menu. What can I get for you?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STYLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Short, warm, practical (2–4 sentences)
+• No markdown: no bold (**), no headers (#), no bullet lists in chat
+• Show prices with ₼
+• After a guest picks a dish, naturally suggest one matching drink or side
+• Never be pushy — one suggestion per turn is enough
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MENU (Azerbaijani / English / Russian — price in ₼)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${MENU_TEXT}`;
+
+/**
+ * Live voice system prompt.
+ * Optimised for spoken Azerbaijani — phoneme guidance for TTS.
+ */
+export const LIVE_SYSTEM_PROMPT = `Sən Green Cafe restoranının AI ofisiantısan. Azərbaycan, rus və ingilis dillərini bilirsən.
+
+DİL QAYDASI: Müştəri hansı dildə danışırsa, sən də HƏMİN DİLDƏ cavab ver.
+
+Azərbaycan dilində danışarkən: rəsmi ədəbi dil, "Siz" müraciəti, sözü tam tələffüz et.
+
+VƏZİFƏ: Menyunu izah et, qiymətləri de, tövsiyə ver. Yalnız restoran mövzusu.
+
+CAVAB FORMATI: Qısa, mehriban. 1-2 cümlə. Heç bir markdown, heç bir siyahı.
+
+RESTORAN: Green Cafe, Şıxov, Green City Resort. Saat 09:00-23:00.
+
+SALAMLAMA: Sessiya başlayanda dərhal qısa Azərbaycanca salamla, məsələn: "Salam, Green Cafe-yə xoş gəldiniz! Nə arzulayırsınız?"
+
+MENYU — bütün qiymətləri bil, soruşanda dəqiq cavab ver:
+${MENU_TEXT}`;
+
+// ─── Quick reply chips (3 languages) ─────────────────────────────────────────
+
+export const QUICK_MESSAGES = [
+  "Bu gün çox acam 🍽️",
+  "Yüngül bir şey istəyirəm",
+  "Büdcəm 10₼-dir",
+  "Что посоветуете?",
+  "What's popular here?",
+];
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
+const INITIAL_GREETING =
+  "Salam! Green Cafe-yə xoş gəlmisiniz. Mən sizin AI ofisiantınızam — menyu, qiymətlər, tövsiyələr barədə kömək edə bilərəm. Hansı dildə rahat danışırsınızsa, həmin dildə yazın.\n\nЗдравствуйте! Я AI-официант Green Cafe. Пишите на любом языке.\n\nHello! I'm your AI waiter at Green Cafe. Write in any language you prefer.";
+
+export function useChat() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: INITIAL_GREETING,
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // ─── Send text message via backend proxy ────────────────────────────────────
+
+  const sendMessage = async (text?: string) => {
+    const messageText = (text ?? input).trim();
+    if (!messageText || isLoading) return;
+
+    setInput("");
+    const userMessage: Message = { role: "user", content: messageText };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setIsLoading(true);
+
+    try {
+      // Route through /api/chat so the API key stays on the server
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: updatedMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          systemPrompt: CHAT_SYSTEM_PROMPT,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error ${response.status}`);
+      }
+
+      const data = await response.json();
+      const assistantText: string =
+        data.content ?? "Bağışlayın, cavab verə bilmədim.";
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: assistantText },
+      ]);
+    } catch (err) {
+      console.error("Chat error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Xəta baş verdi. Bir az sonra yenidən cəhd edin.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    messages,
+    input,
+    setInput,
+    isLoading,
+    sendMessage,
+    messagesEndRef,
+  };
+}

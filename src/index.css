@@ -12,3 +12,26 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes toast-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.animate-toast {
+  animation: toast-fade 1.5s ease-in-out forwards;
+}

@@ -1,9 +1,14 @@
 import { useTranslation } from "react-i18next";
+import BackButton from "../BackButton/BackButton";
 
 const languages = ["az", "en", "ru"] as const;
 type Language = (typeof languages)[number];
 
-export default function Header() {
+type HeaderProps = {
+  onBack?: () => void;
+};
+
+export default function Header({ onBack }: HeaderProps) {
   const { t, i18n } = useTranslation();
 
   const currentLanguage = (i18n.language?.split("-")[0] || "az") as Language;
@@ -15,24 +20,26 @@ export default function Header() {
   return (
     <header className="border-b border-stone-200 bg-[#f6f6f2]/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          {onBack && <BackButton onClick={onBack} />}
+
           <img
             src="/images/logo.png"
             alt="Green Cafe logo"
-            className="h-10 w-10 object-contain opacity-80"
+            className="h-10 w-10 shrink-0 object-contain opacity-80"
           />
 
-          <div>
-            <p className="font-serif text-lg leading-none text-stone-900">
+          <div className="min-w-0">
+            <p className="truncate font-serif text-lg leading-none text-stone-900">
               {t("brand.name")}
             </p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-stone-500">
+            <p className="mt-1 truncate text-[10px] uppercase tracking-[0.22em] text-stone-500">
               {t("brand.tagline")}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 rounded-full border border-stone-200 bg-white/60 p-1">
+        <div className="flex shrink-0 items-center gap-1 rounded-full border border-stone-200 bg-white/60 p-1">
           {languages.map((lang) => {
             const isActive = currentLanguage === lang;
 

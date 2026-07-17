@@ -15,7 +15,34 @@
   },
   "common": {
     "noImage": "Şəkil yoxdur",
-    "descriptionFallback": "Tərkib məlumatı tezliklə əlavə olunacaq."
+    "descriptionFallback": "Tərkib məlumatı tezliklə əlavə olunacaq.",
+    "back": "Geri"
+  },
+  "landing": {
+    "startChat": "AI Ofisant ilə söhbətə başla",
+    "openMenu": "Menyuya gir",
+    "callWaiter": "Ofisantı çağır"
+  },
+  "order": {
+    "title": "Sifarişiniz",
+    "subtotal": "Alt məbləğ",
+    "serviceFee": "Servis haqqı (10%)",
+    "total": "Ümumi məbləğ",
+    "totalKcal": "Ümumi kalori",
+    "empty": "Hələ sifariş yoxdur",
+    "checkout": "Sifarişi tamamla",
+    "summaryBar": "{{count}} məhsul · {{total}} ₼",
+    "viewOrder": "Sifarişə bax",
+    "addedToast": "Səbətə əlavə olundu"
+  },
+  "aiwaiter": {
+    "greeting": "Salam! 👋",
+    "subtitle": "Mən AI Ofisantam. Sizə necə kömək edə bilərəm?",
+    "tabs": {
+      "chat": "Söhbət",
+      "menu": "Menyu",
+      "order": "Sifariş"
+    }
   },
   "categories": {
     "soups": "Şorbalar",

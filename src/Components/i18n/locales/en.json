@@ -15,7 +15,34 @@
   },
   "common": {
     "noImage": "No Image",
-    "descriptionFallback": "Description will be added soon."
+    "descriptionFallback": "Description will be added soon.",
+    "back": "Back"
+  },
+  "landing": {
+    "startChat": "Start chatting with the AI Waiter",
+    "openMenu": "Open the menu",
+    "callWaiter": "Call the waiter"
+  },
+  "order": {
+    "title": "Your Order",
+    "subtotal": "Subtotal",
+    "serviceFee": "Service fee (10%)",
+    "total": "Total",
+    "totalKcal": "Total calories",
+    "empty": "No items in your order yet",
+    "checkout": "Complete order",
+    "summaryBar": "{{count}} items · {{total}} ₼",
+    "viewOrder": "View order",
+    "addedToast": "Added to cart"
+  },
+  "aiwaiter": {
+    "greeting": "Hi! 👋",
+    "subtitle": "I'm your AI Waiter. How can I help you?",
+    "tabs": {
+      "chat": "Chat",
+      "menu": "Menu",
+      "order": "Order"
+    }
   },
   "categories": {
     "soups": "Soups",

@@ -15,7 +15,34 @@
   },
   "common": {
     "noImage": "Нет изображения",
-    "descriptionFallback": "Описание скоро будет добавлено."
+    "descriptionFallback": "Описание скоро будет добавлено.",
+    "back": "Назад"
+  },
+  "landing": {
+    "startChat": "Начать общение с AI-официантом",
+    "openMenu": "Открыть меню",
+    "callWaiter": "Позвать официанта"
+  },
+  "order": {
+    "title": "Ваш заказ",
+    "subtotal": "Промежуточный итог",
+    "serviceFee": "Сервисный сбор (10%)",
+    "total": "Итого",
+    "totalKcal": "Всего калорий",
+    "empty": "В заказе пока нет позиций",
+    "checkout": "Оформить заказ",
+    "summaryBar": "{{count}} поз. · {{total}} ₼",
+    "viewOrder": "Смотреть заказ",
+    "addedToast": "Добавлено в корзину"
+  },
+  "aiwaiter": {
+    "greeting": "Привет! 👋",
+    "subtitle": "Я ваш AI-официант. Чем могу помочь?",
+    "tabs": {
+      "chat": "Чат",
+      "menu": "Меню",
+      "order": "Заказ"
+    }
   },
   "categories": {
     "soups": "Супы",

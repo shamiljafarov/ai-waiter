@@ -6,9 +6,16 @@ import SplashScreen from "./Components/SplashScreen/SplashScreen";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import Chatbot from "./Components/Chatbot/Chatbot";
+import Landing from "./Components/Landing/Landing";
+import AiWaiterScreen from "./Components/AiWaiterScreen/AiWaiterScreen";
+import Checkout from "./Components/Checkout/Checkout";
+import { OrderProvider } from "./context/OrderContext";
+
+type Screen = "landing" | "menu" | "aiwaiter" | "checkout";
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [screen, setScreen] = useState<Screen>("landing");
 
   const categories = useMemo(
     () =>
@@ -67,37 +74,47 @@ export default function App() {
   }, [categories]);
 
   return (
-    <>
-      <Header />
+    <OrderProvider>
+      {screen !== "aiwaiter" && (
+        <Header onBack={screen === "menu" ? () => setScreen("landing") : undefined} />
+      )}
 
       {showSplash && (
         <SplashScreen onFinish={() => setShowSplash(false)} />
       )}
 
       <div className="min-h-screen bg-[#f6f6f2] text-stone-900">
-        <CategoryNav
-          categories={categories}
-          activeCategory={activeCategory}
-          onCategoryClick={handleCategoryClick}
-        />
+        {screen === "menu" && (
+          <>
+            <CategoryNav
+              categories={categories}
+              activeCategory={activeCategory}
+              onCategoryClick={handleCategoryClick}
+            />
 
-        <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="space-y-20">
-            {menuData.map((category) => (
-              <MenuSection
-                key={category.key}
-                category={category}
-                sectionRef={(element) => {
-                  sectionRefs.current[category.key] = element;
-                }}
-              />
-            ))}
-          </div>
-        </main>
+            <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+              <div className="space-y-20">
+                {menuData.map((category) => (
+                  <MenuSection
+                    key={category.key}
+                    category={category}
+                    sectionRef={(element) => {
+                      sectionRefs.current[category.key] = element;
+                    }}
+                  />
+                ))}
+              </div>
+            </main>
+          </>
+        )}
+
+        {screen === "landing" && <Landing onNavigate={setScreen} />}
+        {screen === "aiwaiter" && <AiWaiterScreen onNavigate={setScreen} />}
+        {screen === "checkout" && <Checkout onNavigate={setScreen} />}
       </div>
 
-      <Footer />
-      <Chatbot />
-    </>
+      {screen === "menu" && <Footer />}
+      {screen === "menu" && <Chatbot />}
+    </OrderProvider>
   );
 }

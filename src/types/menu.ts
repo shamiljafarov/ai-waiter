@@ -6,6 +6,7 @@ export type MenuItem = {
   price: number;
   weight?: string;
   badgeKey?: string;
+  kcal?: number;
 };
 
 export type MenuCategory = {
