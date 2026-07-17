@@ -25,7 +25,7 @@
   },
   "order": {
     "title": "Your Order",
-    "subtotal": "Subtotal",
+    "subtotal": "Total",
     "serviceFee": "Service fee (10%)",
     "total": "Total",
     "totalKcal": "Total calories",
