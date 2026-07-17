@@ -33,7 +33,8 @@
     "checkout": "Complete order",
     "summaryBar": "{{count}} items · {{total}} ₼",
     "viewOrder": "View order",
-    "addedToast": "Added to cart"
+    "addedToast": "Added to cart",
+    "addFailedHint": "⚠️ The order wasn't updated — please say it again or use the + button on the menu."
   },
   "aiwaiter": {
     "greeting": "Hi! 👋",

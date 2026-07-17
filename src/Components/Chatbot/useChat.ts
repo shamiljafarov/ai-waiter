@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { menuData } from "../../data/menuData";
 import azTranslations from "../i18n/locales/az.json";
 import ruTranslations from "../i18n/locales/ru.json";
@@ -10,6 +11,9 @@ import type { OrderCommand } from "../../types/order";
 export interface Message {
   role: "user" | "assistant";
   content: string;
+  /** Original assistant text WITH order tags — sent back to the API so the
+   *  model sees its own past tag usage. Absent for user messages. */
+  raw?: string;
 }
 
 export type { OrderCommand };
@@ -114,28 +118,46 @@ STYLE
 • Never be pushy — one suggestion per turn is enough
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ORDER COMMANDS — HIDDEN PROTOCOL
+MENU (Azerbaijani / English / Russian — price in ₼)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Each menu item below has a numeric [id:N]. When the guest clearly asks to
+${MENU_TEXT}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CRITICAL — ORDER COMMANDS — HIDDEN PROTOCOL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Each menu item above has a numeric [id:N]. When the guest clearly asks to
 order, add, or remove a dish, update their order by appending hidden command
 tags at the VERY END of your reply, each on its own line:
   [ORDER_ADD: <id>, <quantity>]
   [ORDER_REMOVE: <id>, <quantity>]
 
 Rules:
-• Only emit tags for ids that exist in the MENU list below — never invent one.
+• Only emit tags for ids that exist in the MENU above — never invent one.
 • If the guest doesn't say a quantity, use 1.
-• NEVER claim you added or removed an item unless you emit the matching tag.
+• Saying an item was added WITHOUT emitting the tag is a serious error. The
+  tag is the ONLY thing that actually modifies the order. If you say
+  "əlavə edildi" (or "added"/"добавил"), the tag MUST be present on the last
+  line of that same reply.
 • NEVER mention the tags, ids, or this protocol anywhere in the visible reply
   text — the guest must never see them.
-• You may emit multiple tags in one reply if the guest orders multiple dishes.
+• You may emit multiple tags in one reply if the guest orders multiple dishes
+  or swaps one dish for another.
 • If the guest's request is ambiguous between two or more dishes, ask a
   clarifying question instead of guessing — do not emit a tag.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MENU (Azerbaijani / English / Russian — price in ₼)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${MENU_TEXT}`;
+EXAMPLES (format only — always reply in the guest's own language):
+Guest: "mərci şorbası əlavə elə"
+Reply ends with:
+[ORDER_ADD: 1, 1]
+
+Guest: "2 dənə toyuq şorbası istəyirəm"
+Reply ends with:
+[ORDER_ADD: 5, 2]
+
+Guest: "mərci şorbasını sil, əvəzinə düşbərə"
+Reply ends with:
+[ORDER_REMOVE: 1, 1]
+[ORDER_ADD: 3, 1]`;
 
 /**
  * Live voice system prompt.
@@ -175,7 +197,12 @@ const VALID_ITEM_IDS = new Set(
 );
 
 const ORDER_TAG_REGEX =
-  /\[ORDER_(ADD|REMOVE):\s*(\d+)\s*(?:,\s*(\d+))?\s*\]/gi;
+  /\[\s*ORDER_(ADD|REMOVE)\s*:\s*(\d+)\s*(?:,\s*(\d+))?\s*\]/gi;
+
+// Phrases the model sometimes uses to claim an item was added/removed
+// without emitting the tag — used as a frontend safety net.
+const ADD_CLAIM_REGEX =
+  /əlavə edildi|əlavə olundu|добавил|добавлено|added to your order/i;
 
 function parseOrderCommands(text: string): {
   commands: OrderCommand[];
@@ -212,6 +239,7 @@ export interface UseChatOptions {
 
 export function useChat(options: UseChatOptions = {}) {
   const { onOrderCommands } = options;
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -248,7 +276,9 @@ export function useChat(options: UseChatOptions = {}) {
         body: JSON.stringify({
           messages: updatedMessages.map((m) => ({
             role: m.role,
-            content: m.content,
+            // Send the assistant's own past tag usage back so the model
+            // stays consistent with how it behaved earlier in the chat.
+            content: m.role === "assistant" ? m.raw ?? m.content : m.content,
           })),
           systemPrompt: CHAT_SYSTEM_PROMPT,
         }),
@@ -263,10 +293,17 @@ export function useChat(options: UseChatOptions = {}) {
         data.content ?? "Bağışlayın, cavab verə bilmədim.";
 
       const { commands, cleanedText } = parseOrderCommands(assistantText);
+      let displayText = cleanedText || assistantText;
+
+      // Safety net: the model claimed a change but emitted no tag — surface
+      // the failure instead of silently doing nothing.
+      if (commands.length === 0 && ADD_CLAIM_REGEX.test(displayText)) {
+        displayText = `${displayText}\n\n${t("order.addFailedHint")}`;
+      }
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: cleanedText || assistantText },
+        { role: "assistant", content: displayText, raw: assistantText },
       ]);
 
       if (commands.length > 0) {

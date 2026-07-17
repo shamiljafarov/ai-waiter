@@ -33,7 +33,8 @@
     "checkout": "Sifarişi tamamla",
     "summaryBar": "{{count}} məhsul · {{total}} ₼",
     "viewOrder": "Sifarişə bax",
-    "addedToast": "Səbətə əlavə olundu"
+    "addedToast": "Səbətə əlavə olundu",
+    "addFailedHint": "⚠️ Sifariş yenilənmədi — zəhmət olmasa yenidən deyin və ya menyudan + düyməsi ilə əlavə edin."
   },
   "aiwaiter": {
     "greeting": "Salam! 👋",
