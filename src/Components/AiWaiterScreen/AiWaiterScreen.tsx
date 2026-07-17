@@ -50,7 +50,7 @@ function useIsDesktop() {
 export default function AiWaiterScreen({ onNavigate }: AiWaiterScreenProps) {
   const { t, i18n } = useTranslation();
   const isDesktop = useIsDesktop();
-  const { orderItems, total } = useOrder();
+  const { orderItems, total, applyOrderCommands } = useOrder();
 
   const currentLanguage = (i18n.language?.split("-")[0] || "az") as Language;
   const handleLanguageChange = (lang: Language) => i18n.changeLanguage(lang);
@@ -73,7 +73,7 @@ export default function AiWaiterScreen({ onNavigate }: AiWaiterScreenProps) {
 
   // ─── AI chat ────────────────────────────────────────────────────────────────
   const { messages, input, setInput, isLoading, sendMessage, messagesEndRef } =
-    useChat();
+    useChat({ onOrderCommands: applyOrderCommands });
   const { isRecording, isTranscribing, toggleRecording } = useSpeech({
     onTranscript: sendMessage,
   });

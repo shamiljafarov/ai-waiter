@@ -10,8 +10,16 @@ type OrderPanelProps = {
 
 export default function OrderPanel({ onNavigate }: OrderPanelProps) {
   const { t } = useTranslation();
-  const { orderItems, removeItem, setQuantity, subtotal, serviceFee, total, totalKcal } =
-    useOrder();
+  const {
+    orderItems,
+    removeItem,
+    setQuantity,
+    subtotal,
+    serviceFee,
+    total,
+    totalKcal,
+    flashIds,
+  } = useOrder();
 
   const isEmpty = orderItems.length === 0;
 
@@ -36,7 +44,9 @@ export default function OrderPanel({ onNavigate }: OrderPanelProps) {
             {orderItems.map((entry) => (
               <div
                 key={entry.item.id}
-                className="flex items-center gap-2 rounded-xl bg-stone-50 p-2"
+                className={`flex items-center gap-2 rounded-xl bg-stone-50 p-2 ${
+                  flashIds.includes(entry.item.id) ? "animate-order-flash" : ""
+                }`}
               >
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-stone-200">
                   {entry.item.image ? (

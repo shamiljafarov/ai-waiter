@@ -4,14 +4,16 @@ import { useLiveVoice, type LiveState } from "./useLiveVoice";
 import { useChat, stripMarkdown, LIVE_SYSTEM_PROMPT, QUICK_MESSAGES } from "./useChat";
 import { useSpeech } from "./useSpeech";
 import LiveVoiceOverlay from "./LiveVoiceOverlay";
+import { useOrder } from "../../context/OrderContext";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const { applyOrderCommands } = useOrder();
 
   const { messages, input, setInput, isLoading, sendMessage, messagesEndRef } =
-    useChat();
+    useChat({ onOrderCommands: applyOrderCommands });
 
   const { isRecording, isTranscribing, toggleRecording } = useSpeech({
     onTranscript: sendMessage,

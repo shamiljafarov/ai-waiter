@@ -1,6 +1,8 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { MenuItem } from "../types/menu";
+import type { OrderCommand } from "../types/order";
+import { menuData } from "../data/menuData";
 
 export type OrderItem = {
   item: MenuItem;
@@ -19,7 +21,17 @@ type OrderContextValue = {
   serviceFee: number;
   total: number;
   totalKcal: number;
+  flashIds: number[];
+  applyOrderCommands: (commands: OrderCommand[]) => void;
 };
+
+function findMenuItem(id: number): MenuItem | undefined {
+  for (const category of menuData) {
+    const found = category.items.find((item) => item.id === id);
+    if (found) return found;
+  }
+  return undefined;
+}
 
 const OrderContext = createContext<OrderContextValue | undefined>(undefined);
 
@@ -67,6 +79,44 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
   const clearOrder = () => setOrderItems([]);
 
+  const decrementItem = (id: number, qty: number) => {
+    setOrderItems((prev) => {
+      const existing = prev.find((entry) => entry.item.id === id);
+      if (!existing) return prev;
+      const newQty = existing.quantity - qty;
+      if (newQty <= 0) {
+        return prev.filter((entry) => entry.item.id !== id);
+      }
+      return prev.map((entry) =>
+        entry.item.id === id ? { ...entry, quantity: newQty } : entry
+      );
+    });
+  };
+
+  const [flashIds, setFlashIds] = useState<number[]>([]);
+
+  const triggerFlash = (id: number) => {
+    setFlashIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setTimeout(() => {
+      setFlashIds((prev) => prev.filter((flashId) => flashId !== id));
+    }, 1000);
+  };
+
+  const applyOrderCommands = (commands: OrderCommand[]) => {
+    commands.forEach((cmd) => {
+      const menuItem = findMenuItem(cmd.id);
+      if (!menuItem) return;
+
+      if (cmd.type === "add") {
+        for (let i = 0; i < cmd.quantity; i++) addItem(menuItem);
+      } else {
+        decrementItem(cmd.id, cmd.quantity);
+      }
+
+      triggerFlash(cmd.id);
+    });
+  };
+
   const subtotal = useMemo(
     () =>
       orderItems.reduce(
@@ -100,6 +150,8 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     serviceFee,
     total,
     totalKcal,
+    flashIds,
+    applyOrderCommands,
   };
 
   return (

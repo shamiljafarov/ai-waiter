@@ -3,6 +3,7 @@ import { menuData } from "../../data/menuData";
 import azTranslations from "../i18n/locales/az.json";
 import ruTranslations from "../i18n/locales/ru.json";
 import enTranslations from "../i18n/locales/en.json";
+import type { OrderCommand } from "../../types/order";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -10,6 +11,8 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
 }
+
+export type { OrderCommand };
 
 // ─── Translation helpers ──────────────────────────────────────────────────────
 
@@ -41,7 +44,7 @@ function buildMenuSummary(): string {
       const nameEn = getNestedValue(enTranslations, item.nameKey) ?? item.nameKey;
       const nameRu = getNestedValue(ruTranslations, item.nameKey) ?? item.nameKey;
       const weight = item.weight ? ` (${item.weight})` : "";
-      lines.push(`  • ${nameAz} / ${nameEn} / ${nameRu} — ${item.price}₼${weight}`);
+      lines.push(`  • [id:${item.id}] ${nameAz} / ${nameEn} / ${nameRu} — ${item.price}₼${weight}`);
     }
   }
 
@@ -111,6 +114,25 @@ STYLE
 • Never be pushy — one suggestion per turn is enough
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ORDER COMMANDS — HIDDEN PROTOCOL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Each menu item below has a numeric [id:N]. When the guest clearly asks to
+order, add, or remove a dish, update their order by appending hidden command
+tags at the VERY END of your reply, each on its own line:
+  [ORDER_ADD: <id>, <quantity>]
+  [ORDER_REMOVE: <id>, <quantity>]
+
+Rules:
+• Only emit tags for ids that exist in the MENU list below — never invent one.
+• If the guest doesn't say a quantity, use 1.
+• NEVER claim you added or removed an item unless you emit the matching tag.
+• NEVER mention the tags, ids, or this protocol anywhere in the visible reply
+  text — the guest must never see them.
+• You may emit multiple tags in one reply if the guest orders multiple dishes.
+• If the guest's request is ambiguous between two or more dishes, ask a
+  clarifying question instead of guessing — do not emit a tag.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MENU (Azerbaijani / English / Russian — price in ₼)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${MENU_TEXT}`;
@@ -146,12 +168,50 @@ export const QUICK_MESSAGES = [
   "What's popular here?",
 ];
 
+// ─── Order command tag parsing ────────────────────────────────────────────────
+
+const VALID_ITEM_IDS = new Set(
+  menuData.flatMap((category) => category.items.map((item) => item.id))
+);
+
+const ORDER_TAG_REGEX =
+  /\[ORDER_(ADD|REMOVE):\s*(\d+)\s*(?:,\s*(\d+))?\s*\]/gi;
+
+function parseOrderCommands(text: string): {
+  commands: OrderCommand[];
+  cleanedText: string;
+} {
+  const commands: OrderCommand[] = [];
+
+  const cleanedText = text
+    .replace(ORDER_TAG_REGEX, (_match, action: string, id: string, qty?: string) => {
+      const parsedId = Number(id);
+      if (VALID_ITEM_IDS.has(parsedId)) {
+        commands.push({
+          type: action.toUpperCase() === "ADD" ? "add" : "remove",
+          id: parsedId,
+          quantity: qty ? Number(qty) : 1,
+        });
+      }
+      return "";
+    })
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
+
+  return { commands, cleanedText };
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 const INITIAL_GREETING =
   "Salam! Green Cafe-yə xoş gəlmisiniz. Mən sizin AI ofisiantınızam — menyu, qiymətlər, tövsiyələr barədə kömək edə bilərəm. Hansı dildə rahat danışırsınızsa, həmin dildə yazın.\n\nЗдравствуйте! Я AI-официант Green Cafe. Пишите на любом языке.\n\nHello! I'm your AI waiter at Green Cafe. Write in any language you prefer.";
 
-export function useChat() {
+export interface UseChatOptions {
+  onOrderCommands?: (commands: OrderCommand[]) => void;
+}
+
+export function useChat(options: UseChatOptions = {}) {
+  const { onOrderCommands } = options;
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -202,10 +262,16 @@ export function useChat() {
       const assistantText: string =
         data.content ?? "Bağışlayın, cavab verə bilmədim.";
 
+      const { commands, cleanedText } = parseOrderCommands(assistantText);
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: assistantText },
+        { role: "assistant", content: cleanedText || assistantText },
       ]);
+
+      if (commands.length > 0) {
+        onOrderCommands?.(commands);
+      }
     } catch (err) {
       console.error("Chat error:", err);
       setMessages((prev) => [

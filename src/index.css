@@ -35,3 +35,16 @@ html {
 .animate-toast {
   animation: toast-fade 1.5s ease-in-out forwards;
 }
+
+@keyframes order-flash {
+  0% {
+    background-color: rgba(159, 125, 28, 0.35);
+  }
+  100% {
+    background-color: rgba(159, 125, 28, 0);
+  }
+}
+
+.animate-order-flash {
+  animation: order-flash 1s ease-out;
+}
