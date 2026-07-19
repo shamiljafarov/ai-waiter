@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { ClipboardList, Minus, Plus, Trash2 } from "lucide-react";
+import { Check, ClipboardList, Minus, Plus, Trash2 } from "lucide-react";
 import { useOrder } from "../../context/OrderContext";
+import type { OrderItem } from "../../context/OrderContext";
 
 type Screen = "landing" | "menu" | "aiwaiter" | "checkout";
 
@@ -19,9 +20,93 @@ export default function OrderPanel({ onNavigate }: OrderPanelProps) {
     total,
     totalKcal,
     flashIds,
+    hasPending,
   } = useOrder();
 
   const isEmpty = orderItems.length === 0;
+  const confirmedItems = orderItems.filter((entry) => entry.status === "confirmed");
+  const pendingItems = orderItems.filter((entry) => entry.status === "pending");
+
+  const renderRow = (entry: OrderItem) => {
+    const isConfirmed = entry.status === "confirmed";
+    return (
+      <div
+        key={entry.lineId}
+        className={`flex items-center gap-2 rounded-xl p-2 ${
+          isConfirmed ? "bg-[#f3d46b]/15" : "bg-stone-50"
+        } ${flashIds.includes(entry.item.id) ? "animate-order-flash" : ""}`}
+      >
+        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-stone-200">
+          {entry.item.image ? (
+            <img
+              src={entry.item.image}
+              alt={t(entry.item.nameKey)}
+              className="h-full w-full object-cover"
+            />
+          ) : null}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="line-clamp-1 text-sm text-stone-900">
+            {t(entry.item.nameKey)}
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-[#9f7d1c]">
+              ₼{entry.item.price.toFixed(2)}
+            </span>
+            {entry.item.kcal != null && (
+              <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] text-stone-500">
+                {entry.item.kcal} kcal
+              </span>
+            )}
+            {isConfirmed && (
+              <span className="flex items-center gap-1 rounded-full bg-[#9f7d1c] px-1.5 py-0.5 text-[10px] font-medium text-white">
+                <Check size={10} />
+                {t("order.confirmed")}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {isConfirmed ? (
+          <span className="shrink-0 text-sm text-stone-500">×{entry.quantity}</span>
+        ) : (
+          <>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setQuantity(entry.item.id, entry.quantity - 1)}
+                aria-label="Decrease quantity"
+                className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-200 text-stone-600 transition hover:bg-stone-100"
+              >
+                <Minus size={12} />
+              </button>
+              <span className="w-4 text-center text-sm text-stone-900">
+                {entry.quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity(entry.item.id, entry.quantity + 1)}
+                aria-label="Increase quantity"
+                className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-200 text-stone-600 transition hover:bg-stone-100"
+              >
+                <Plus size={12} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => removeItem(entry.item.id)}
+              aria-label="Remove item"
+              className="shrink-0 p-1 text-stone-400 transition hover:text-red-500"
+            >
+              <Trash2 size={16} />
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-white">
@@ -40,72 +125,28 @@ export default function OrderPanel({ onNavigate }: OrderPanelProps) {
             <p className="text-sm text-stone-500">{t("order.empty")}</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {orderItems.map((entry) => (
-              <div
-                key={entry.item.id}
-                className={`flex items-center gap-2 rounded-xl bg-stone-50 p-2 ${
-                  flashIds.includes(entry.item.id) ? "animate-order-flash" : ""
-                }`}
-              >
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-stone-200">
-                  {entry.item.image ? (
-                    <img
-                      src={entry.item.image}
-                      alt={t(entry.item.nameKey)}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : null}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-1 text-sm text-stone-900">
-                    {t(entry.item.nameKey)}
-                  </p>
-                  <div className="mt-0.5 flex items-center gap-1.5">
-                    <span className="text-xs text-[#9f7d1c]">
-                      ₼{entry.item.price.toFixed(2)}
-                    </span>
-                    {entry.item.kcal != null && (
-                      <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] text-stone-500">
-                        {entry.item.kcal} kcal
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(entry.item.id, entry.quantity - 1)}
-                    aria-label="Decrease quantity"
-                    className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-200 text-stone-600 transition hover:bg-stone-100"
-                  >
-                    <Minus size={12} />
-                  </button>
-                  <span className="w-4 text-center text-sm text-stone-900">
-                    {entry.quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(entry.item.id, entry.quantity + 1)}
-                    aria-label="Increase quantity"
-                    className="flex h-6 w-6 items-center justify-center rounded-full border border-stone-200 text-stone-600 transition hover:bg-stone-100"
-                  >
-                    <Plus size={12} />
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeItem(entry.item.id)}
-                  aria-label="Remove item"
-                  className="shrink-0 p-1 text-stone-400 transition hover:text-red-500"
-                >
-                  <Trash2 size={16} />
-                </button>
+          <div className="space-y-4">
+            {confirmedItems.length > 0 && (
+              <div className="space-y-2">
+                {confirmedItems.map(renderRow)}
               </div>
-            ))}
+            )}
+
+            {confirmedItems.length > 0 && pendingItems.length > 0 && (
+              <div className="flex items-center gap-2 px-1">
+                <div className="h-px flex-1 bg-stone-100" />
+                <span className="text-[10px] font-medium uppercase tracking-wide text-stone-400">
+                  {t("order.newItems")}
+                </span>
+                <div className="h-px flex-1 bg-stone-100" />
+              </div>
+            )}
+
+            {pendingItems.length > 0 && (
+              <div className="space-y-2">
+                {pendingItems.map(renderRow)}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -134,14 +175,25 @@ export default function OrderPanel({ onNavigate }: OrderPanelProps) {
           </div>
         </div>
 
-        <button
-          type="button"
-          disabled={isEmpty}
-          onClick={() => onNavigate("checkout")}
-          className="mt-4 w-full rounded-xl bg-[#9f7d1c] py-3 text-sm font-medium text-white transition hover:bg-[#8a6c17] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {t("order.checkout")}
-        </button>
+        {hasPending ? (
+          <button
+            type="button"
+            disabled={isEmpty}
+            onClick={() => onNavigate("checkout")}
+            className="mt-4 w-full rounded-xl bg-[#9f7d1c] py-3 text-sm font-medium text-white transition hover:bg-[#8a6c17] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {t("order.checkout")}
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={isEmpty}
+            onClick={() => onNavigate("checkout")}
+            className="mt-4 w-full rounded-xl border border-[#9f7d1c] bg-white py-3 text-sm font-medium text-[#9f7d1c] transition hover:bg-[#9f7d1c]/10 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {t("order.goToPayment")}
+          </button>
+        )}
       </div>
     </div>
   );

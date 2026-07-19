@@ -157,7 +157,9 @@ Reply ends with:
 Guest: "mərci şorbasını sil, əvəzinə düşbərə"
 Reply ends with:
 [ORDER_REMOVE: 1, 1]
-[ORDER_ADD: 3, 1]`;
+[ORDER_ADD: 3, 1]
+
+Items already confirmed (sent to kitchen) cannot be removed — politely explain this and suggest calling the waiter for changes.`;
 
 /**
  * Live voice system prompt.
@@ -183,7 +185,9 @@ VACİB — SİFARİŞ FUNKSİYALARI: Aşağıdakı menyuda hər yeməyin yanınd
 Miqdar deyilməyibsə, 1 istifadə et. Funksiyanı çağırmadan HEÇ VAXT "əlavə etdim", "sifarişə əlavə olundu" və ya bənzər bir şey demə — funksiya sifarişi DƏYİŞDİRƏN yeganə vasitədir, sözlə demək kifayət etmir. Funksiyanı çağırdıqdan sonra qonağa öz dilində qısa şəkildə şifahi təsdiq et.
 
 MENYU — bütün qiymətləri və id-ləri bil, soruşanda dəqiq cavab ver:
-${MENU_TEXT}`;
+${MENU_TEXT}
+
+Items already confirmed (sent to kitchen) cannot be removed — politely explain this and suggest calling the waiter for changes.`;
 
 // ─── Quick reply chips (3 languages) ─────────────────────────────────────────
 

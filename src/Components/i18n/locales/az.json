@@ -34,7 +34,19 @@
     "summaryBar": "{{count}} məhsul · {{total}} ₼",
     "viewOrder": "Sifarişə bax",
     "addedToast": "Səbətə əlavə olundu",
-    "addFailedHint": "⚠️ Sifariş yenilənmədi — zəhmət olmasa yenidən deyin və ya menyudan + düyməsi ilə əlavə edin."
+    "addFailedHint": "⚠️ Sifariş yenilənmədi — zəhmət olmasa yenidən deyin və ya menyudan + düyməsi ilə əlavə edin.",
+    "confirmed": "Təsdiqlənib",
+    "newItems": "Yeni əlavələr",
+    "goToPayment": "Ödənişə keç"
+  },
+  "checkout": {
+    "confirm": "Sifarişi təsdiqlə",
+    "confirmSuccess": "Sifariş təsdiqləndi",
+    "pay": "Ödəniş et",
+    "payTitle": "Ödəniş üsulunu seçin",
+    "card": "Kart",
+    "cash": "Nağd",
+    "paySuccess": "Ödəniş qəbul edildi. Nuş olsun!"
   },
   "aiwaiter": {
     "greeting": "Salam! 👋",

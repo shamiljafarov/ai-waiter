@@ -4,10 +4,14 @@ import type { MenuItem } from "../types/menu";
 import type { OrderCommand } from "../types/order";
 import { menuData } from "../data/menuData";
 
+export type OrderItemStatus = "pending" | "confirmed";
+
 export type OrderItem = {
+  lineId: string;
   item: MenuItem;
   quantity: number;
   note?: string;
+  status: OrderItemStatus;
 };
 
 type OrderContextValue = {
@@ -17,12 +21,15 @@ type OrderContextValue = {
   setQuantity: (id: number, qty: number) => void;
   setNote: (id: number, note: string) => void;
   clearOrder: () => void;
+  confirmOrder: () => void;
   subtotal: number;
   serviceFee: number;
   total: number;
   totalKcal: number;
   flashIds: number[];
   applyOrderCommands: (commands: OrderCommand[]) => void;
+  hasPending: boolean;
+  hasConfirmed: boolean;
 };
 
 function findMenuItem(id: number): MenuItem | undefined {
@@ -42,29 +49,40 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: MenuItem) => {
     setOrderItems((prev) => {
-      const existing = prev.find((entry) => entry.item.id === item.id);
-      if (existing) {
+      const existingPending = prev.find(
+        (entry) => entry.item.id === item.id && entry.status === "pending"
+      );
+      if (existingPending) {
         return prev.map((entry) =>
-          entry.item.id === item.id
+          entry.lineId === existingPending.lineId
             ? { ...entry, quantity: entry.quantity + 1 }
             : entry
         );
       }
-      return [...prev, { item, quantity: 1 }];
+      return [
+        ...prev,
+        { lineId: crypto.randomUUID(), item, quantity: 1, status: "pending" },
+      ];
     });
   };
 
   const removeItem = (id: number) => {
-    setOrderItems((prev) => prev.filter((entry) => entry.item.id !== id));
+    setOrderItems((prev) =>
+      prev.filter((entry) => !(entry.item.id === id && entry.status === "pending"))
+    );
   };
 
   const setQuantity = (id: number, qty: number) => {
     setOrderItems((prev) => {
       if (qty <= 0) {
-        return prev.filter((entry) => entry.item.id !== id);
+        return prev.filter(
+          (entry) => !(entry.item.id === id && entry.status === "pending")
+        );
       }
       return prev.map((entry) =>
-        entry.item.id === id ? { ...entry, quantity: qty } : entry
+        entry.item.id === id && entry.status === "pending"
+          ? { ...entry, quantity: qty }
+          : entry
       );
     });
   };
@@ -72,23 +90,35 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const setNote = (id: number, note: string) => {
     setOrderItems((prev) =>
       prev.map((entry) =>
-        entry.item.id === id ? { ...entry, note } : entry
+        entry.item.id === id && entry.status === "pending"
+          ? { ...entry, note }
+          : entry
       )
     );
   };
 
   const clearOrder = () => setOrderItems([]);
 
+  const confirmOrder = () => {
+    setOrderItems((prev) =>
+      prev.map((entry) =>
+        entry.status === "pending" ? { ...entry, status: "confirmed" } : entry
+      )
+    );
+  };
+
   const decrementItem = (id: number, qty: number) => {
     setOrderItems((prev) => {
-      const existing = prev.find((entry) => entry.item.id === id);
+      const existing = prev.find(
+        (entry) => entry.item.id === id && entry.status === "pending"
+      );
       if (!existing) return prev;
       const newQty = existing.quantity - qty;
       if (newQty <= 0) {
-        return prev.filter((entry) => entry.item.id !== id);
+        return prev.filter((entry) => entry.lineId !== existing.lineId);
       }
       return prev.map((entry) =>
-        entry.item.id === id ? { ...entry, quantity: newQty } : entry
+        entry.lineId === existing.lineId ? { ...entry, quantity: newQty } : entry
       );
     });
   };
@@ -139,6 +169,16 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     [orderItems]
   );
 
+  const hasPending = useMemo(
+    () => orderItems.some((entry) => entry.status === "pending"),
+    [orderItems]
+  );
+
+  const hasConfirmed = useMemo(
+    () => orderItems.some((entry) => entry.status === "confirmed"),
+    [orderItems]
+  );
+
   const value: OrderContextValue = {
     orderItems,
     addItem,
@@ -146,12 +186,15 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     setQuantity,
     setNote,
     clearOrder,
+    confirmOrder,
     subtotal,
     serviceFee,
     total,
     totalKcal,
     flashIds,
     applyOrderCommands,
+    hasPending,
+    hasConfirmed,
   };
 
   return (

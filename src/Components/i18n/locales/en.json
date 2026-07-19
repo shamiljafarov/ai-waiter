@@ -34,7 +34,19 @@
     "summaryBar": "{{count}} items · {{total}} ₼",
     "viewOrder": "View order",
     "addedToast": "Added to cart",
-    "addFailedHint": "⚠️ The order wasn't updated — please say it again or use the + button on the menu."
+    "addFailedHint": "⚠️ The order wasn't updated — please say it again or use the + button on the menu.",
+    "confirmed": "Confirmed",
+    "newItems": "New additions",
+    "goToPayment": "Proceed to payment"
+  },
+  "checkout": {
+    "confirm": "Confirm order",
+    "confirmSuccess": "Order confirmed",
+    "pay": "Pay now",
+    "payTitle": "Choose payment method",
+    "card": "Card",
+    "cash": "Cash",
+    "paySuccess": "Payment received. Enjoy your meal!"
   },
   "aiwaiter": {
     "greeting": "Hi! 👋",

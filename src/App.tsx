@@ -121,7 +121,7 @@ export default function App() {
         </div>
 
         {screen === "checkout" && (
-          <Checkout onBack={() => setScreen(previousScreen)} />
+          <Checkout onBack={() => setScreen(previousScreen)} onNavigate={navigate} />
         )}
       </div>
 
