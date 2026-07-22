@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Mic, MicOff, AudioLines, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Mic, MicOff, Phone, Loader2 } from "lucide-react";
 import { useLiveVoice, type LiveState } from "./useLiveVoice";
 import { useChat, stripMarkdown, LIVE_SYSTEM_PROMPT, QUICK_MESSAGES } from "./useChat";
 import { useSpeech } from "./useSpeech";
@@ -100,7 +100,7 @@ export default function Chatbot() {
               className="rounded-full p-1.5 text-stone-400 transition hover:bg-white/10 hover:text-white"
               title="Canlı danış"
             >
-              <AudioLines size={18} />
+              <Phone size={18} />
             </button>
           </div>
 

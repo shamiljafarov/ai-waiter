@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  AudioLines,
+  Phone,
   Loader2,
   Mic,
   MicOff,
@@ -297,7 +297,7 @@ export default function AiWaiterScreen({ onNavigate }: AiWaiterScreenProps) {
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 transition hover:bg-stone-200"
           title="Canlı danış"
         >
-          <AudioLines size={16} />
+          <Phone size={16} />
         </button>
       </div>
     </>
