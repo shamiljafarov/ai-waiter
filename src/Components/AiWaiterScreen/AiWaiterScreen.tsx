@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Phone,
+  Speech,
   Loader2,
   Mic,
   MicOff,
@@ -247,25 +247,13 @@ export default function AiWaiterScreen({ onNavigate }: AiWaiterScreenProps) {
 
       {/* Input row */}
       <div className="flex shrink-0 items-center gap-2 border-t border-stone-200 p-3">
+        
         <button
-          onClick={toggleRecording}
-          disabled={inputDisabled}
-          title={isRecording ? "Dayandır" : "Danış"}
-          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition ${
-            isRecording
-              ? "animate-pulse bg-red-500 text-white"
-              : isTranscribing
-              ? "bg-stone-200 text-stone-400"
-              : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-          } disabled:opacity-40`}
+          onClick={openLive}
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center border border-t-orange-950 rounded-full bg-stone-100 text-stone-600 transition hover:bg-stone-200"
+          title="Canlı danış"
         >
-          {isTranscribing ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : isRecording ? (
-            <MicOff size={15} />
-          ) : (
-            <Mic size={15} />
-          )}
+          <Speech size={16} />
         </button>
 
         <input
@@ -293,12 +281,27 @@ export default function AiWaiterScreen({ onNavigate }: AiWaiterScreenProps) {
         </button>
 
         <button
-          onClick={openLive}
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 transition hover:bg-stone-200"
-          title="Canlı danış"
+          onClick={toggleRecording}
+          disabled={inputDisabled}
+          title={isRecording ? "Dayandır" : "Danış"}
+          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition ${
+            isRecording
+              ? "animate-pulse bg-red-500 text-white"
+              : isTranscribing
+              ? "bg-stone-200 text-stone-400"
+              : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+          } disabled:opacity-40`}
         >
-          <Phone size={16} />
+          {isTranscribing ? (
+            <Loader2 size={15} className="animate-spin" />
+          ) : isRecording ? (
+            <MicOff size={15} />
+          ) : (
+            <Mic size={15} />
+          )}
         </button>
+
+        
       </div>
     </>
   );
